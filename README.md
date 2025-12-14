@@ -7,7 +7,7 @@ An intelligent news aggregator that collects AI-related news from RSS feeds and 
 - 📰 **RSS Feed Aggregation**: Fetches AI-related news from Techmeme RSS feed
 - 📺 **YouTube Integration**: Collects videos from multiple AI-focused YouTube channels
 - 🤖 **AI-Powered Ranking**: Uses Google Gemini to rank news by importance/hotness
-- 📝 **Smart Summarization**: 
+- 📝 **Smart Summarization**:
   - Website news: Uses existing summaries
   - YouTube videos: Transcribes and summarizes using AI
 - 🎯 **Top News Selection**: Automatically selects and processes top-ranked news items
@@ -15,52 +15,92 @@ An intelligent news aggregator that collects AI-related news from RSS feeds and 
 ## Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone git@github.com:prajwolsubedi/news-aggregator.git
    cd news-aggregator
    ```
 
 2. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Set up environment variables**
    Create a `.env` file in the project root:
+
    ```
    GEMINI_API_KEY=your_gemini_api_key_here
    YOUTUBE_API_KEY=your_youtube_api_key_here
+
+   # Email configuration (for sending news)
+   SENDER_EMAIL=your_email@gmail.com
+   SENDER_PASSWORD=your_app_password
+   SMTP_SERVER=smtp.gmail.com
+   SMTP_PORT=587
+   RECIPIENT_EMAIL=recipient@example.com
    ```
+
+   **Note for Gmail users**: You'll need to use an [App Password](https://support.google.com/accounts/answer/185833) instead of your regular password.
 
 ## Usage
 
 ### 1. Fetch News from RSS and YouTube
+
 ```bash
 python combine_news.py
 ```
+
 This will:
+
 - Fetch AI-related news from RSS feed
 - Fetch videos from YouTube channels
 - Combine and save to `combined_news.json`
 
 ### 2. Rank News by Importance
+
 ```bash
 python rank_news.py
 ```
+
 This will:
+
 - Send news titles to Google Gemini for ranking
 - Rank news by importance score (1-100)
 - Save ranked results to `ranked_news.json`
 
 ### 3. Process Top News
+
 ```bash
 python process_top_news.py
 ```
+
 This will:
+
 - Select top 11 ranked news items
 - Transcribe YouTube videos
 - Generate AI summaries for YouTube content
 - Save processed news to `top_news.json`
+
+### 4. Send News via Email
+
+```bash
+python send_email.py
+```
+
+Or specify recipient email:
+
+```bash
+python send_email.py recipient@example.com
+```
+
+This will:
+
+- Load top news from `top_news.json`
+- Create a beautifully styled HTML email
+- Send email with news summaries, titles, links, and YouTube thumbnails
+- Include smooth animations and responsive design
 
 ## Project Structure
 
@@ -98,6 +138,7 @@ This will:
 ## Ranking Criteria
 
 News is ranked based on:
+
 - New AI model launches (GPT, Claude, Gemini, etc.)
 - OpenAI and Anthropic AI announcements
 - Major model releases and breakthroughs
