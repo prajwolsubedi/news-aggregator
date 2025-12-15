@@ -1,10 +1,15 @@
-from youtube_transcript_api import YouTubeTranscriptApi
+import requests
+import os
+from dotenv import load_dotenv
+import argparse
+import sys
+
+load_dotenv()
 
 
 def transcribe_youtube_video(video_id: str):
     """
-    Transcribe a YouTube video using youtube-transcript-api.
-    Checks available transcripts and tries multiple fallback options.
+    Transcribe a YouTube video using SerpAPI.
     
     Args:
         video_id: YouTube video ID
@@ -15,64 +20,100 @@ def transcribe_youtube_video(video_id: str):
     try:
         print(f"   📝 Transcribing video {video_id}...")
         
-        # List available transcripts for debugging
-        transcript_list = None
-        try:
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-            available = []
-            for t in transcript_list:
-                transcript_type = "manual" if t.is_generated == False else "auto-generated"
-                available.append(f"{t.language_code} ({transcript_type})")
-            print(f"   📋 Available transcripts: {', '.join(available)}")
-        except Exception as e:
-            print(f"   ⚠ Could not list transcripts: {e}")
+        serp_api_key = os.getenv("SERP_API_KEY")
+        if not serp_api_key:
+            raise Exception("SERP_API_KEY not found in environment variables")
         
-        # Try to get transcript with multiple fallback options
-        transcript = None
+        params = {
+            "api_key": serp_api_key,
+            "engine": "youtube_video_transcript",
+            "v": video_id,
+            "type": "asr"
+        }
         
-        # Option 1: Try English variants using get_transcript
-        for lang_code in ['en', 'en-US', 'en-GB', 'en-AU']:
-            try:
-                transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=[lang_code])
-                print(f"   ✓ Got transcript in {lang_code}")
-                break
-            except Exception as e:
-                continue
+        response = requests.get("https://serpapi.com/search", params=params)
+        response.raise_for_status()
         
-        # Option 2: Use list_transcripts to fetch (handles auto-generated better)
-        if not transcript and transcript_list:
-            try:
-                # Try manual English first
-                try:
-                    transcript_obj = transcript_list.find_manually_created_transcript(['en'])
-                    transcript = transcript_obj.fetch()
-                    print(f"   ✓ Got manual transcript in {transcript_obj.language_code}")
-                except:
-                    # Try auto-generated English
-                    try:
-                        transcript_obj = transcript_list.find_generated_transcript(['en'])
-                        transcript = transcript_obj.fetch()
-                        print(f"   ✓ Got auto-generated transcript in {transcript_obj.language_code}")
-                    except:
-                        # Try any available transcript
-                        for transcript_obj in transcript_list:
-                            try:
-                                transcript = transcript_obj.fetch()
-                                print(f"   ✓ Got transcript in {transcript_obj.language_code}")
-                                break
-                            except:
-                                continue
-            except Exception as e:
-                print(f"   ⚠ Error fetching from list: {e}")
+        data = response.json()
+        transcript_items = data.get("transcript", [])
         
-        if not transcript:
-            raise Exception("No accessible transcripts found - transcript may be disabled or unavailable")
+        if not transcript_items:
+            raise Exception("No transcript found for this video")
         
-        full_text = " ".join(segment["text"] for segment in transcript)
-        print(f"   ✓ Transcript retrieved ({len(full_text)} characters, {len(full_text.split())} words)")
-        return full_text, None
+        whole_transcript = " ".join(item.get("snippet", "") for item in transcript_items)
+        
+        if not whole_transcript.strip():
+            raise Exception("Transcript is empty")
+        
+        print(f"   ✓ Transcript retrieved ({len(whole_transcript)} characters, {len(whole_transcript.split())} words)")
+        return whole_transcript, None
         
     except Exception as e:
         error_msg = str(e)
         print(f"   ✗ Transcription failed: {error_msg}")
         return None, error_msg
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Transcribe a YouTube video by video ID",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python youtube_transcribe.py dQw4w9WgXcQ
+  python youtube_transcribe.py --video-id dQw4w9WgXcQ
+  python youtube_transcribe.py --video-id dQw4w9WgXcQ --output transcript.txt
+        """
+    )
+    parser.add_argument(
+        "video_id",
+        nargs="?",
+        help="YouTube video ID (e.g., 'dQw4w9WgXcQ' from URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
+    )
+    parser.add_argument(
+        "--video-id",
+        dest="video_id_flag",
+        help="YouTube video ID (alternative to positional argument)"
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        help="Optional: Save transcript to a file (default: print to stdout)"
+    )
+    
+    args = parser.parse_args()
+    
+    # Get video_id from either positional argument or --video-id flag
+    video_id = args.video_id or args.video_id_flag
+    
+    if not video_id:
+        parser.error("Video ID is required. Provide it as a positional argument or use --video-id")
+    
+    # Extract video ID from full URL if provided
+    if "youtube.com" in video_id or "youtu.be" in video_id:
+        if "v=" in video_id:
+            video_id = video_id.split("v=")[1].split("&")[0]
+        elif "youtu.be/" in video_id:
+            video_id = video_id.split("youtu.be/")[1].split("?")[0]
+    
+    # Transcribe the video
+    transcript, error = transcribe_youtube_video(video_id)
+    
+    if error:
+        print(f"\n❌ Error: {error}")
+        sys.exit(1)
+    
+    if transcript:
+        if args.output:
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write(transcript)
+            print(f"\n✓ Transcript saved to: {args.output}")
+        else:
+            print("\n" + "="*80)
+            print("TRANSCRIPT:")
+            print("="*80)
+            print(transcript)
+            print("="*80)
+    else:
+        print("\n❌ Failed to retrieve transcript")
+        sys.exit(1)
