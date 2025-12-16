@@ -12,42 +12,15 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY")) if os.getenv("GEMINI_
 
 def load_ranked_news(json_file: str = "ranked_news.json"):
     """Load ranked news from JSON file."""
-    try:
-        with open(json_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        
-        # Handle both formats: direct list or dict with ranked_news key
-        if isinstance(data, dict) and "ranked_news" in data:
-            return data["ranked_news"]
-        elif isinstance(data, list):
-            return data
-        else:
-            print(f"✗ Unexpected format in {json_file}")
-            return []
-    except FileNotFoundError:
-        print(f"✗ File not found: {json_file}")
-        return []
-    except Exception as e:
-        print(f"✗ Error loading ranked news: {e}")
-        return []
+    from utils import load_json_file, get_news_from_json
+    data = load_json_file(json_file)
+    return get_news_from_json(data) if data else []
 
 def load_combined_news(json_file: str = "combined_news.json"):
     """Load combined news from JSON file."""
-    try:
-        with open(json_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        
-        # Handle both old format (list) and new format (dict with metadata)
-        if isinstance(data, dict) and "news" in data:
-            return data["news"]
-        else:
-            return data
-    except FileNotFoundError:
-        print(f"✗ File not found: {json_file}")
-        return []
-    except Exception as e:
-        print(f"✗ Error loading combined news: {e}")
-        return []
+    from utils import load_json_file, get_news_from_json
+    data = load_json_file(json_file)
+    return get_news_from_json(data) if data else []
 
 def get_news_by_id(news_items: list, news_id: int):
     """Get news item by sequential ID."""
@@ -171,8 +144,12 @@ def process_top_news(top_n: int = 11):
         
         if source == "website":
             # Use existing summary
-            processed_item["summary"] = news_item.get("summary", "")
-            print(f"   ✓ Using existing summary ({len(processed_item['summary'])} characters)")
+            summary = news_item.get("summary") or ""
+            processed_item["summary"] = summary
+            if summary:
+                print(f"   ✓ Using existing summary ({len(summary)} characters)")
+            else:
+                print(f"   ⚠ No summary available for this news item")
             
         elif source == "youtube":
             # Get video ID
@@ -203,20 +180,15 @@ def process_top_news(top_n: int = 11):
 
 def save_top_news(processed_news: list, output_file: str = "top_news.json"):
     """Save processed top news to JSON file."""
-    try:
-        output_data = {
-            "total_items": len(processed_news),
-            "news": processed_news
-        }
-        
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(output_data, f, indent=2, ensure_ascii=False)
-        
+    from utils import save_json_file
+    output_data = {
+        "total_items": len(processed_news),
+        "news": processed_news
+    }
+    success = save_json_file(output_file, output_data)
+    if success:
         print(f"\n✓ Saved top news to: {output_file}")
-        return True
-    except Exception as e:
-        print(f"✗ Error saving top news: {e}")
-        return False
+    return success
 
 if __name__ == "__main__":
     try:

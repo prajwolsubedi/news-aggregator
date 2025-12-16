@@ -28,7 +28,7 @@ def transcribe_youtube_video(video_id: str):
             "api_key": serp_api_key,
             "engine": "youtube_video_transcript",
             "v": video_id,
-            "type": "asr"
+            # "type": "asr"
         }
         
         response = requests.get("https://serpapi.com/search", params=params)

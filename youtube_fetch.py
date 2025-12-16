@@ -84,38 +84,25 @@ def fetch_videos_from_channels(channel_names: list):
     return all_videos
 
 if __name__ == "__main__":
-    # List of channel names/handles to fetch videos from
-    channels = [
-        "@matthew_berman",
-        "@aiDotEngineer",
-        "@aiadvantage",
-        "@aiexplained-official",
-        "@mreflow",
-        "@Fireship",
-        "@IshanSharma7390",
-        "@OpenAI",
-        "@anthropic-ai",
-        "@google"
-    ]
+    from config import YOUTUBE_CHANNELS
+    from utils import save_json_file
     
     print("\n" + "="*50)
     print("FETCHING VIDEOS FROM CHANNELS")
     print("="*50)
-    print(f"Channels: {len(channels)}\n")
+    print(f"Channels: {len(YOUTUBE_CHANNELS)}\n")
     
     try:
-        all_videos = fetch_videos_from_channels(channels)
+        all_videos = fetch_videos_from_channels(YOUTUBE_CHANNELS)
         
         # Save to JSON file
-        with open("youtube_videos.json", "w", encoding="utf-8") as f:
-            json.dump(all_videos, f, indent=2, ensure_ascii=False)
-        
-        print("\n" + "="*50)
-        print("SUMMARY")
-        print("="*50)
-        print(f"Total videos found: {len(all_videos)}")
-        print(f"✓ Saved to: youtube_videos.json")
-        print("="*50)
+        if save_json_file("youtube_videos.json", all_videos):
+            print("\n" + "="*50)
+            print("SUMMARY")
+            print("="*50)
+            print(f"Total videos found: {len(all_videos)}")
+            print(f"✓ Saved to: youtube_videos.json")
+            print("="*50)
         
     except Exception as e:
         print(f"Error: {e}")

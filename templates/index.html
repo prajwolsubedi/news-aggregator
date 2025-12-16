@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AI News Subscription</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #0f172a;
+        color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 16px;
+      }
+
+      .card {
+        background: #020617;
+        border-radius: 16px;
+        padding: 24px 28px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
+        max-width: 420px;
+        width: 100%;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 1.6rem;
+      }
+
+      p {
+        margin: 0 0 18px;
+        color: #9ca3af;
+        font-size: 0.95rem;
+      }
+
+      form {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      input[type="email"] {
+        flex: 1 1 180px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid #374151;
+        background: #020617;
+        color: #f9fafb;
+        font-size: 0.95rem;
+      }
+
+      input[type="email"]::placeholder {
+        color: #6b7280;
+      }
+
+      button[type="submit"] {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #6366f1, #ec4899);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+
+      button[type="submit"]:hover {
+        filter: brightness(1.05);
+      }
+
+      .hint {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: #6b7280;
+      }
+
+      .status {
+        margin-top: 14px;
+        font-size: 0.9rem;
+      }
+
+      .status--success {
+        color: #4ade80;
+      }
+
+      .status--error {
+        color: #f87171;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Subscribe to AI News</h1>
+      <p>Get a curated summary of the most important AI news in your inbox.</p>
+
+      <form method="POST" action="/subscribe">
+        <input
+          type="email"
+          name="email"
+          placeholder="you@example.com"
+          required
+        />
+        <button type="submit">Subscribe</button>
+      </form>
+
+      <p class="hint">
+        We'll email you when there's something worth reading. Unsubscribe
+        anytime.
+      </p>
+
+      {% if message %}
+      <p
+        class="status {% if message_type == 'error' %}status--error{% else %}status--success{% endif %}"
+      >
+        {{ message }}
+      </p>
+      {% endif %}
+    </div>
+  </body>
+</html>

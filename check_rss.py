@@ -100,14 +100,10 @@ def fetch_rss_news():
                 ai_news_last_24h.append(news_item)
 
     # Save to JSON files
-    with open("ai_news.json", "w", encoding="utf-8") as f:
-        json.dump(ai_news, f, indent=2, ensure_ascii=False)
-
-    with open("all_news.json", "w", encoding="utf-8") as f:
-        json.dump(all_news, f, indent=2, ensure_ascii=False)
-
-    with open("ai_news_last_24h.json", "w", encoding="utf-8") as f:
-        json.dump(ai_news_last_24h, f, indent=2, ensure_ascii=False)
+    from utils import save_json_file
+    save_json_file("ai_news.json", ai_news)
+    save_json_file("all_news.json", all_news)
+    save_json_file("ai_news_last_24h.json", ai_news_last_24h)
 
     return ai_news_last_24h
 

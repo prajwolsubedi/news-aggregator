@@ -45,20 +45,8 @@ def combine_news():
     
     # Fetch YouTube videos
     print("\n📺 Fetching YouTube videos...")
-    channels = [
-        "@matthew_berman",
-        "@aiDotEngineer",
-        "@aiadvantage",
-        "@aiexplained-official",
-        "@mreflow",
-        "@Fireship",
-        "@IshanSharma7390",
-        "@OpenAI",
-        "@anthropic-ai",
-        "@google"
-    ]
-    
-    youtube_videos = fetch_videos_from_channels(channels)
+    from config import YOUTUBE_CHANNELS
+    youtube_videos = fetch_videos_from_channels(YOUTUBE_CHANNELS)
     
     # Add source field to YouTube videos (video_id already exists)
     for video in youtube_videos:
@@ -85,8 +73,8 @@ def combine_news():
     }
     
     # Save to JSON file
-    with open("combined_news.json", "w", encoding="utf-8") as f:
-        json.dump(combined_data, f, indent=2, ensure_ascii=False)
+    from utils import save_json_file
+    save_json_file("combined_news.json", combined_data)
     
     # Print summary
     print("\n" + "="*50)
@@ -199,21 +187,9 @@ def get_news_items(json_file: str = "combined_news.json"):
     Returns:
         list: List of news items
     """
-    try:
-        with open(json_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        
-        # Handle both old format (list) and new format (dict with metadata)
-        if isinstance(data, dict) and "news" in data:
-            return data["news"]
-        else:
-            return data
-    except FileNotFoundError:
-        print(f"✗ File not found: {json_file}")
-        return []
-    except Exception as e:
-        print(f"✗ Error loading news: {e}")
-        return []
+    from utils import load_json_file, get_news_from_json
+    data = load_json_file(json_file)
+    return get_news_from_json(data) if data else []
 
 if __name__ == "__main__":
     try:
