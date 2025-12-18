@@ -1,0 +1,22 @@
+name: Trigger Newsletter Pipeline on Render
+
+on:
+  schedule:
+    # 03:15 UTC == 09:00 NPT
+    # Nepal Standard Time is UTC+5:45
+    - cron: "15 3 * * *"
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  call-pipeline-endpoint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call /internal/run-pipeline on Render
+        run: |
+          curl -X POST \
+            -H "X-Cron-Token: $CRON_SECRET" \
+            "$RENDER_BASE_URL/internal/run-pipeline"
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          RENDER_BASE_URL: ${{ secrets.RENDER_BASE_URL }}

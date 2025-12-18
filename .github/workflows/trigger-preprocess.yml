@@ -1,0 +1,22 @@
+name: Trigger Preprocess on Render
+
+on:
+  schedule:
+    # 02:45 UTC == 08:30 NPT
+    # Nepal Standard Time is UTC+5:45
+    - cron: "45 2 * * *"
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  call-preprocess-endpoint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call /internal/run-preprocess on Render
+        run: |
+          curl -X POST \
+            -H "X-Cron-Token: $CRON_SECRET" \
+            "$RENDER_BASE_URL/internal/run-preprocess"
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          RENDER_BASE_URL: ${{ secrets.RENDER_BASE_URL }}
