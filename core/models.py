@@ -2,7 +2,8 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-import database
+
+from core import database
 
 
 @dataclass
@@ -15,24 +16,24 @@ class Subscriber:
     is_active: bool
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Subscriber':
+    def from_dict(cls, data: dict) -> "Subscriber":
         """Create Subscriber instance from database dict."""
         return cls(
-            id=data['id'],
-            email=data['email'],
-            subscribed_at=data['subscribed_at'],
-            unsubscribe_token=data['unsubscribe_token'],
-            is_active=data['is_active']
+            id=data["id"],
+            email=data["email"],
+            subscribed_at=data["subscribed_at"],
+            unsubscribe_token=data["unsubscribe_token"],
+            is_active=data["is_active"],
         )
 
     def to_dict(self) -> dict:
         """Convert Subscriber instance to dictionary."""
         return {
-            'id': self.id,
-            'email': self.email,
-            'subscribed_at': self.subscribed_at,
-            'unsubscribe_token': self.unsubscribe_token,
-            'is_active': self.is_active
+            "id": self.id,
+            "email": self.email,
+            "subscribed_at": self.subscribed_at,
+            "unsubscribe_token": self.unsubscribe_token,
+            "is_active": self.is_active,
         }
 
 
@@ -110,4 +111,3 @@ def is_email_subscribed(email: str) -> bool:
     """
     subscriber = get_subscriber_by_email(email)
     return subscriber is not None and subscriber.is_active
-

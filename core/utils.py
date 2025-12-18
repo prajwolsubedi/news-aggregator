@@ -51,8 +51,8 @@ def get_news_from_json(data: Any) -> List[Dict]:
     """Extract news items from JSON data, handling different formats.
     
     Handles formats:
-    - {"news": [...]}
-    - {"ranked_news": [...]}
+    - {"news": [...]} 
+    - {"ranked_news": [...]} 
     - [...]
     
     Args:

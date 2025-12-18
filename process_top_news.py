@@ -3,7 +3,7 @@ import os
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
-from youtube_transcribe import transcribe_youtube_video
+from transcription_jobs import create_transcription_job, get_transcript_by_video_id
 
 load_dotenv()
 
@@ -159,11 +159,14 @@ def process_top_news(top_n: int = 11):
                 print(f"   ✗ No video_id found for news item {news_id}")
                 processed_item["summary"] = "Video transcription unavailable"
             else:
-                # Transcribe video
-                transcript, error_msg = transcribe_youtube_video(video_id)
+                # Check if transcript exists in database
+                transcript_data = get_transcript_by_video_id(video_id)
                 
-                if transcript:
-                    # Summarize transcript with Gemini
+                if transcript_data and transcript_data.get("transcript"):
+                    # Transcript exists, summarize it
+                    transcript = transcript_data["transcript"]
+                    print(f"   ✓ Found transcript ({len(transcript)} characters)")
+                    
                     summary = summarize_with_gemini(transcript)
                     
                     if summary:
@@ -171,8 +174,9 @@ def process_top_news(top_n: int = 11):
                     else:
                         processed_item["summary"] = "Summary generation failed"
                 else:
-                    # Store the specific error message
-                    processed_item["summary"] = f"Video transcription unavailable: {error_msg or 'Unknown error'}"
+                    # No transcript yet - job may be pending or not created
+                    print(f"   ⏳ No transcript found for video {video_id} (may be pending)")
+                    processed_item["summary"] = "Transcription pending - waiting for worker"
         
         processed_news.append(processed_item)
     

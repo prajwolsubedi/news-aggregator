@@ -1,11 +1,30 @@
-feedparser==6.0.12
-sgmllib3k==1.0.0
-beautifulsoup4==4.12.3
-google-genai>=1.0.0
-python-dotenv==1.0.1
-google-api-python-client==2.144.0
-youtube-transcript-api==0.6.2
-requests>=2.31.0
+# Core Web Framework
+Flask>=2.0.0
+Werkzeug>=2.0.0
+Jinja2>=3.0.0
+itsdangerous>=2.0.0
+MarkupSafe>=2.0.0
+
+# Database
 psycopg2-binary>=2.9.0
-Flask>=3.0.0
-APScheduler>=3.10.4
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Google APIs (Gemini AI and YouTube)
+google-genai>=0.2.0
+google-api-python-client>=2.0.0
+google-auth>=2.0.0
+googleapis-common-protos>=1.50.0
+
+# RSS Feed Parsing
+feedparser>=6.0.0
+beautifulsoup4>=4.12.0
+
+# HTTP Requests (for tests and API calls)
+requests>=2.28.0
+
+# Scheduler
+APScheduler>=3.10.0
+
+# Note: Email uses built-in smtplib (no additional packages needed)

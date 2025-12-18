@@ -1,5 +1,6 @@
 import os
 from typing import Tuple, Union
+from datetime import datetime
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, Response
@@ -8,6 +9,7 @@ import database
 import models
 from email_templates import get_welcome_email, get_unsubscribe_email
 from send_email import validate_email, _build_unsubscribe_url, send_raw_html_email
+from transcription_jobs import get_pending_jobs, claim_jobs
 
 
 load_dotenv()
@@ -171,6 +173,118 @@ def unsubscribe(token: str) -> Response:
         message_type="success",
     )
     return Response(html, mimetype="text/html")
+
+
+@app.route("/api/get-videos", methods=["GET"])
+def get_videos():
+    """
+    Worker endpoint: Returns pending transcription jobs and marks them as CLAIMED.
+    Workers call this to get work.
+    """
+    try:
+        worker_id = request.args.get("worker_id", "unknown")
+        limit = request.args.get("limit", 5, type=int)
+        
+        # Ensure limit is valid
+        if limit is None or limit < 1:
+            limit = 5
+        
+        # Get pending jobs
+        jobs = get_pending_jobs(limit=limit)
+        
+        # Ensure jobs is a list
+        if not isinstance(jobs, list):
+            jobs = []
+        
+        if not jobs:
+            return _success_response({"jobs": []})
+        
+        # Claim the jobs atomically
+        job_ids = [job["job_id"] for job in jobs]
+        claim_success = claim_jobs(job_ids, worker_id)
+        
+        # Always return jobs, even if claiming failed (they'll be retried)
+        return _success_response({"jobs": jobs})
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return _error_response(f"Error fetching jobs: {str(e)}", 500)
+
+
+@app.route("/api/upload-all-transcripts", methods=["POST"])
+def upload_all_transcripts() -> Tuple[Response, int]:
+    """
+    Worker endpoint: Accepts batch transcript uploads from worker.
+    Stores transcripts and marks jobs as COMPLETED.
+    """
+    if not request.is_json:
+        return _error_response("Request must be JSON", 400)
+    
+    data = request.get_json()
+    worker_id = data.get("worker_id", "unknown")
+    results = data.get("results", [])
+    
+    if not results:
+        return _error_response("No results provided", 400)
+    
+    try:
+        with database.get_db_connection() as conn:
+            cursor = conn.cursor()
+            success_count = 0
+            
+            for result in results:
+                job_id = result.get("job_id")
+                video_id = result.get("video_id")
+                transcript = result.get("transcript")
+                language = result.get("language", "en")
+                duration = result.get("duration", 0)
+                
+                if not job_id or not video_id or not transcript:
+                    continue
+                
+                try:
+                    # Store transcript
+                    cursor.execute("""
+                        INSERT INTO transcripts
+                        (video_id, job_id, transcript, language, duration)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (video_id)
+                        DO UPDATE SET
+                            transcript = EXCLUDED.transcript,
+                            language = EXCLUDED.language,
+                            duration = EXCLUDED.duration,
+                            job_id = EXCLUDED.job_id
+                    """, (video_id, job_id, transcript, language, duration))
+                    
+                    # Mark job as completed
+                    cursor.execute("""
+                        UPDATE transcription_jobs
+                        SET status = 'COMPLETED',
+                            completed_at = %s
+                        WHERE job_id = %s
+                    """, (datetime.utcnow(), job_id))
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    print(f"Error processing job {job_id}: {e}")
+                    # Mark job as failed
+                    cursor.execute("""
+                        UPDATE transcription_jobs
+                        SET status = 'FAILED',
+                            error_message = %s
+                        WHERE job_id = %s
+                    """, (str(e), job_id))
+            
+            return _success_response({
+                "success": True,
+                "processed": success_count,
+                "total": len(results)
+            })
+            
+    except Exception as e:
+        return _error_response(f"Error processing transcripts: {str(e)}", 500)
 
 
 if __name__ == "__main__":
