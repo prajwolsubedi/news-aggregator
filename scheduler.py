@@ -41,12 +41,13 @@ def _create_scheduler(timezone: Optional[str] = None) -> BlockingScheduler:
     """
     scheduler = BlockingScheduler(timezone=timezone)
 
-    # Run every day at 09:00 (server local time by default)
+    # Run every day at 9am Nepal time (3:15am UTC)
+    # Nepal Standard Time is UTC+5:45
     scheduler.add_job(
         _run_pipeline,
         "cron",
-        hour=23,
-        minute=30,
+        hour=3,
+        minute=15,
         id="daily_pipeline",
         replace_existing=True,
     )
@@ -66,7 +67,7 @@ def main() -> None:
 
     scheduler = _create_scheduler(timezone=tz)
 
-    logging.info("Starting APScheduler for daily pipeline at 09:00...")
+    logging.info("Starting APScheduler for daily pipeline at 9am Nepal time (3:15am UTC)...")
     try:
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):

@@ -1,50 +1,55 @@
-"""Main pipeline orchestrator that runs all news processing steps sequentially."""
+"""Main pipeline orchestrator: builds and sends newsletter from stored ranking.
+
+This script does NOT re-rank news. It reads the top 10 ranked items from
+daily_ranked_news (created by preprocess_jobs.py), joins with transcripts,
+generates summaries, and sends the newsletter.
+"""
 
 import sys
 import traceback
-from combine_news import combine_news
-from rank_news import rank_news_with_gemini, prepare_news_for_ranking
-from process_top_news import process_top_news, save_top_news
+from datetime import date
+
+from core.database import get_daily_ranked_news
+from process_top_news import build_issue_from_ranked_news, save_top_news
 from send_email import send_news_to_all_subscribers
-from config import TOP_NEWS_COUNT
 
 
 def main():
-    """Run the complete news pipeline: fetch, combine, rank, process, and send emails."""
+    """Build and send newsletter from stored ranking (no re-ranking)."""
     print("\n" + "="*60)
-    print("AI NEWS PIPELINE - STARTING")
+    print("BUILDING & SENDING NEWSLETTER FROM STORED RANKING")
     print("="*60)
     
     try:
-        # Step 1: Combine news (fetches RSS and YouTube internally)
-        print("\n[1/5] Fetching and combining news from all sources...")
-        combined_news = combine_news()
-        print(f"✓ Combined {len(combined_news)} total news items")
+        # Step 1: Load ranked items from database (no ranking here!)
+        print("\n[1/4] Loading ranked news from database...")
+        today = date.today()
+        ranked_items = get_daily_ranked_news(today)
         
-        # Step 2: Rank news
-        print("\n[2/5] Ranking news by importance...")
-        prepared_news = prepare_news_for_ranking(combined_news)
-        if not prepared_news:
-            print("✗ No valid news items to rank")
+        if not ranked_items:
+            print(f"✗ No ranked news found for {today}")
+            print("   Run preprocess_jobs.py first to rank and store top 10 items")
             return False
-        ranked_news, ranked_output = rank_news_with_gemini(prepared_news, top_n=TOP_NEWS_COUNT)
-        if not ranked_news:
-            print("✗ Failed to rank news")
-            return False
-        print(f"✓ Ranked {len(ranked_news)} top news items")
         
-        # Step 3: Process top news (transcribe YouTube, summarize)
-        print("\n[3/5] Processing top news (transcribing & summarizing)...")
-        processed_news = process_top_news(top_n=TOP_NEWS_COUNT)
-        if processed_news:
-            save_top_news(processed_news)
-            print(f"✓ Processed {len(processed_news)} news items")
-        else:
-            print("✗ No news items processed")
+        print(f"✓ Loaded {len(ranked_items)} ranked items from daily_ranked_news")
+        
+        # Step 2: Build processed news (join with transcripts, generate summaries)
+        print("\n[2/4] Processing ranked items (joining transcripts, generating summaries)...")
+        processed_news = build_issue_from_ranked_news(ranked_items)
+        
+        if not processed_news:
+            print("✗ Failed to process ranked news")
             return False
+        
+        print(f"✓ Processed {len(processed_news)} news items")
+        
+        # Step 3: Save final issue to database
+        print("\n[3/4] Saving final issue to database...")
+        save_top_news(processed_news)
+        print("✓ Issue saved to daily_top_news")
         
         # Step 4: Send emails to all subscribers
-        print("\n[4/5] Sending emails to subscribers...")
+        print("\n[4/4] Sending emails to subscribers...")
         success = send_news_to_all_subscribers(processed_news)
         
         if success:

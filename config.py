@@ -44,4 +44,4 @@ YOUTUBE_CHANNELS = [
 ]
 
 # News Processing Configuration
-TOP_NEWS_COUNT = 11  # Number of top news items to process and send
+TOP_NEWS_COUNT = 10  # Number of top news items to process and send

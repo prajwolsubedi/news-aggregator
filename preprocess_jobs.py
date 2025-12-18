@@ -1,34 +1,40 @@
 """
-Preprocessing step: Create transcription jobs for YouTube videos.
+Preprocessing step: Rank news once and store top 10, create transcription jobs for YouTube videos.
 
 This runs before workers start to create all transcription jobs.
 Workers will pull these jobs when they start.
+
+This is the ONLY place where Gemini ranking happens.
 """
 
-from combine_news import combine_news
-from rank_news import rank_news_with_gemini, prepare_news_for_ranking
-from transcription_jobs import create_transcription_job
+from datetime import date
+from news.combine_news import combine_news
+from ranking.rank_news import rank_news_with_gemini, prepare_news_for_ranking
+from transcription.transcription_jobs import create_transcription_job
+from core.utils import load_json_file, get_news_from_json
+from core.database import insert_daily_ranked_news
 from config import TOP_NEWS_COUNT
 
 
 def preprocess_and_create_jobs():
     """
-    Preprocessing step: Creates transcription jobs for top YouTube videos.
+    Preprocessing step: Ranks all news once, stores top 10 in daily_ranked_news,
+    and creates transcription jobs only for top-10 YouTube videos.
     
     This should run before workers start (e.g., 8:00 AM if workers start at 8:30 AM).
     """
     print("\n" + "="*60)
-    print("PREPROCESSING: CREATING TRANSCRIPTION JOBS")
+    print("PREPROCESSING: RANKING NEWS & CREATING TRANSCRIPTION JOBS")
     print("="*60)
     
     try:
-        # Step 1: Fetch RSS news
-        print("\n[1/4] Fetching RSS news...")
+        # Step 1: Fetch + combine news
+        print("\n[1/5] Fetching and combining news from all sources...")
         rss_news = combine_news()  # This combines RSS and YouTube
         print(f"✓ Combined {len(rss_news)} total news items")
         
-        # Step 2: Rank news
-        print("\n[2/4] Ranking all content...")
+        # Step 2: Rank ALL news once (this is the ONLY ranking step)
+        print("\n[2/5] Ranking all content with Gemini...")
         prepared_news = prepare_news_for_ranking(rss_news)
         if not prepared_news:
             print("✗ No valid news items to rank")
@@ -40,43 +46,71 @@ def preprocess_and_create_jobs():
             return False
         print(f"✓ Ranked {len(ranked_news)} top news items")
         
-        # Step 3: Select top YouTube videos
-        print("\n[3/4] Selecting top YouTube videos...")
-        from utils import load_json_file, get_news_from_json
+        # Step 3: Load combined news for full metadata
+        print("\n[3/5] Loading full news metadata...")
         data = load_json_file("combined_news.json")
         all_news = get_news_from_json(data) if data else []
         news_by_id = {item.get("id"): item for item in all_news}
         
-        top_youtube_videos = []
-        for ranked_item in ranked_news:
-            if ranked_item.get("source") == "youtube":
-                news_id = ranked_item.get("id")
-                news_item = news_by_id.get(news_id)
-                if news_item and news_item.get("video_id"):
-                    top_youtube_videos.append(news_item)
+        # Step 4: Store top 10 ranked items in daily_ranked_news
+        print("\n[4/5] Storing top 10 ranked items in database...")
+        today = date.today()
+        top_ranked = ranked_news[:TOP_NEWS_COUNT]
+        top_items_for_db = []
         
-        print(f"✓ Found {len(top_youtube_videos)} YouTube videos in top news")
-        
-        # Step 4: Create transcription jobs
-        print("\n[4/4] Creating transcription jobs...")
-        jobs_created = 0
-        for idx, video in enumerate(top_youtube_videos):
-            video_id = video.get("video_id")
-            video_url = video.get("video_link", f"https://www.youtube.com/watch?v={video_id}" if video_id else "")
-            video_title = video.get("title", "")
+        for idx, ranked_item in enumerate(top_ranked, start=1):
+            news_id = ranked_item.get("id")
+            source = ranked_item.get("source", "unknown")
+            news_item = news_by_id.get(news_id)
             
-            if video_id:
-                try:
-                    job_id = create_transcription_job(
-                        video_id=video_id,
-                        video_url=video_url,
-                        video_title=video_title,
-                        priority=idx  # Lower index = higher priority
-                    )
-                    jobs_created += 1
-                    print(f"   ✓ Created job for: {video_title[:50]}...")
-                except Exception as e:
-                    print(f"   ✗ Error creating job for {video_id}: {e}")
+            if not news_item:
+                print(f"   ⚠ Skipping ranked item {news_id} - not found in combined news")
+                continue
+            
+            top_items_for_db.append({
+                "rank": idx,
+                "source": source,
+                "news_id": news_id,
+                "title": news_item.get("title", ""),
+                "published_at": news_item.get("published_at"),
+                "source_link": news_item.get("source_link") if source == "website" else news_item.get("video_link", ""),
+                "video_id": news_item.get("video_id") if source == "youtube" else None,
+                "summary": news_item.get("summary") if source == "website" else None,
+            })
+        
+        rows_inserted = insert_daily_ranked_news(today, top_items_for_db)
+        if rows_inserted:
+            print(f"✓ Stored {rows_inserted} ranked items in daily_ranked_news for {today}")
+        else:
+            print("✗ Failed to store ranked items in database")
+            return False
+        
+        # Step 5: Create transcription jobs only for top-10 YouTube videos
+        print("\n[5/5] Creating transcription jobs for top YouTube videos...")
+        top_youtube_videos = [
+            item for item in top_items_for_db
+            if item["source"] == "youtube" and item["video_id"]
+        ]
+        
+        print(f"✓ Found {len(top_youtube_videos)} YouTube videos in top 10")
+        
+        jobs_created = 0
+        for idx, item in enumerate(top_youtube_videos):
+            video_id = item["video_id"]
+            video_url = item["source_link"]
+            video_title = item["title"]
+            
+            try:
+                job_id = create_transcription_job(
+                    video_id=video_id,
+                    video_url=video_url,
+                    video_title=video_title,
+                    priority=idx  # Lower index = higher priority
+                )
+                jobs_created += 1
+                print(f"   ✓ Created job for: {video_title[:50]}...")
+            except Exception as e:
+                print(f"   ✗ Error creating job for {video_id}: {e}")
         
         print(f"\n✓ Created {jobs_created} transcription job(s)")
         print("="*60)

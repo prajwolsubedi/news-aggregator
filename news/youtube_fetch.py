@@ -1,8 +1,11 @@
 import os
 import json
 from datetime import datetime, timedelta, timezone
+
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
+
+from core.utils import save_json_file
 
 load_dotenv()
 
@@ -12,19 +15,15 @@ youtube = build(
     developerKey=os.getenv("YOUTUBE_API_KEY")
 )
 
+
 def fetch_latest_videos(username: str):
-    """
-    Fetch latest videos from a YouTube channel using username/handle.
-    
-    Args:
-        username: Channel username/handle (e.g., "google" or "@google")
-    """
+    """Fetch latest videos from a YouTube channel using username/handle."""
     since = datetime.now(timezone.utc) - timedelta(hours=24)
     
     # Remove @ if present
     username_clean = username.lstrip("@")
     
-    # Search for the channel by username/handle (works for all channels)
+    # Search for the channel by username/handle
     search_response = youtube.search().list(
         part="snippet",
         q=username_clean,
@@ -61,19 +60,14 @@ def fetch_latest_videos(username: str):
 
     return videos
 
+
 def fetch_videos_from_channels(channel_names: list):
-    """
-    Fetch latest videos from multiple YouTube channels and save to JSON.
-    
-    Args:
-        channel_names: List of channel usernames/handles
-    """
+    """Fetch latest videos from multiple YouTube channels and save to JSON."""
     all_videos = []
     
     for channel_name in channel_names:
         try:
             videos = fetch_latest_videos(channel_name)
-            # Add channel name to each video
             for video in videos:
                 video["channel_name"] = channel_name
             all_videos.extend(videos)
@@ -83,9 +77,9 @@ def fetch_videos_from_channels(channel_names: list):
     
     return all_videos
 
+
 if __name__ == "__main__":
     from config import YOUTUBE_CHANNELS
-    from utils import save_json_file
     
     print("\n" + "="*50)
     print("FETCHING VIDEOS FROM CHANNELS")
@@ -95,7 +89,6 @@ if __name__ == "__main__":
     try:
         all_videos = fetch_videos_from_channels(YOUTUBE_CHANNELS)
         
-        # Save to JSON file
         if save_json_file("youtube_videos.json", all_videos):
             print("\n" + "="*50)
             print("SUMMARY")

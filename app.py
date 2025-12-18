@@ -1,23 +1,50 @@
 import os
+import logging
 from typing import Tuple, Union
-from datetime import datetime
+from datetime import datetime, timezone, timedelta, time
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, Response
 
-import database
-import models
-from email_templates import get_welcome_email, get_unsubscribe_email
-from send_email import validate_email, _build_unsubscribe_url, send_raw_html_email
-from transcription_jobs import get_pending_jobs, claim_jobs
-
+from core import database, models
+from email_templates import get_welcome_email, get_unsubscribe_email, get_welcome_with_news_email
+from send_email import validate_email, _build_unsubscribe_url, send_raw_html_email, send_email, load_top_news
+from transcription.cleanup_jobs import cleanup_stale_jobs
+from transcription.transcription_jobs import get_pending_jobs, claim_jobs
+from ranking.rank_news import get_top_news
+from news.combine_news import combine_news
 
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "change-me-in-production")
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO if os.getenv("FLASK_ENV") == "production" else logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
+)
+
+# Secret key for sessions - must be set in production
+secret_key = os.getenv("SECRET_KEY")
+if not secret_key or secret_key == "change-me-in-production":
+    if os.getenv("FLASK_ENV") == "production":
+        raise ValueError("SECRET_KEY must be set in production environment")
+    logging.warning("Using default SECRET_KEY - not suitable for production")
+    secret_key = "change-me-in-production"
+
+app.secret_key = secret_key
 
 _db_initialized = False
+
+# Nepal Standard Time is UTC+5:45
+NEPAL_TIMEZONE_OFFSET = timedelta(hours=5, minutes=45)
+
+
+def _is_after_9am_nepal_time() -> bool:
+    """Check if current time is after 9am Nepal Standard Time (UTC+5:45)."""
+    utc_now = datetime.now(timezone.utc)
+    nepal_time = utc_now + NEPAL_TIMEZONE_OFFSET
+    return nepal_time.time() >= time(9, 0)
 
 
 def _error_response(message: str, status_code: int = 400) -> Tuple[Response, int]:
@@ -118,10 +145,24 @@ def subscribe() -> Tuple[Response, int]:
         )
         return Response(html, mimetype="text/html"), 500
 
-    # Build unsubscribe URL for welcome email and send it
+    # Build unsubscribe URL for welcome email
     unsubscribe_url = _build_unsubscribe_url(subscriber.unsubscribe_token)
-    subject, html_body = get_welcome_email(unsubscribe_url)
-    send_raw_html_email(subscriber.email, subject, html_body)
+    
+    # Check if user signed up after 9am Nepal time and send today's news if available
+    if _is_after_9am_nepal_time():
+        today_news = load_top_news()
+        if today_news:
+            # Send welcome email with today's daily news
+            subject, html_body = get_welcome_with_news_email(unsubscribe_url, today_news)
+            send_raw_html_email(subscriber.email, subject, html_body)
+        else:
+            # No news available yet, send regular welcome email
+            subject, html_body = get_welcome_email(unsubscribe_url)
+            send_raw_html_email(subscriber.email, subject, html_body)
+    else:
+        # Before 9am, send regular welcome email
+        subject, html_body = get_welcome_email(unsubscribe_url)
+        send_raw_html_email(subscriber.email, subject, html_body)
 
     response_data = {
         "email": subscriber.email,
@@ -207,8 +248,7 @@ def get_videos():
         return _success_response({"jobs": jobs})
             
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        logging.exception("Error fetching transcription jobs")
         return _error_response(f"Error fetching jobs: {str(e)}", 500)
 
 
@@ -268,7 +308,7 @@ def upload_all_transcripts() -> Tuple[Response, int]:
                     success_count += 1
                     
                 except Exception as e:
-                    print(f"Error processing job {job_id}: {e}")
+                    logging.error(f"Error processing job {job_id}: {e}")
                     # Mark job as failed
                     cursor.execute("""
                         UPDATE transcription_jobs

@@ -3,22 +3,39 @@ import os
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
-from transcription_jobs import create_transcription_job, get_transcript_by_video_id
+
+from core.utils import load_json_file, get_news_from_json
+from core.database import create_daily_top_news
+from transcription.transcription_jobs import create_transcription_job, get_transcript_by_video_id
 
 load_dotenv()
 
 # Initialize Gemini API client
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY")) if os.getenv("GEMINI_API_KEY") else genai.Client()
 
+
 def load_ranked_news(json_file: str = "ranked_news.json"):
-    """Load ranked news from JSON file."""
-    from utils import load_json_file, get_news_from_json
+    """Load ranked news from JSON file.
+
+    Expects the JSON file (written by ranking/rank_news.py) to be in the
+    server working directory when this script is run.
+
+    This is primarily for standalone runs of this script; the main
+    pipeline passes ranked news in-memory instead.
+    """
     data = load_json_file(json_file)
     return get_news_from_json(data) if data else []
 
+
 def load_combined_news(json_file: str = "combined_news.json"):
-    """Load combined news from JSON file."""
-    from utils import load_json_file, get_news_from_json
+    """Load combined news from JSON file.
+
+    Expects the JSON file (written by news/combine_news.py) to be in the
+    server working directory when this script is run.
+
+    This is primarily for standalone runs of this script; the main
+    pipeline passes combined news in-memory instead.
+    """
     data = load_json_file(json_file)
     return get_news_from_json(data) if data else []
 
@@ -72,7 +89,93 @@ Transcript:
         print(f"   ✗ Error summarizing with Gemini: {e}")
         return None
 
-def process_top_news(top_n: int = 11):
+def build_issue_from_ranked_news(ranked_items):
+    """Build processed news list from daily_ranked_news records.
+
+    This function reads ranked items from the database (already ranked by Gemini)
+    and processes them:
+    - For websites: uses stored summary
+    - For YouTube: looks up transcript and generates summary if available
+
+    Args:
+        ranked_items: list of dicts from get_daily_ranked_news(), each with:
+            rank, source, news_id, title, published_at, source_link, video_id, summary
+
+    Returns:
+        list: Processed news items ready for email
+    """
+    from transcription.transcription_jobs import get_transcript_by_video_id
+
+    print("\n" + "="*50)
+    print("BUILDING ISSUE FROM STORED RANKING")
+    print("="*50)
+
+    processed_news = []
+
+    print(f"\n🔄 Processing {len(ranked_items)} ranked items...")
+    print("="*50)
+
+    for idx, item in enumerate(ranked_items, 1):
+        rank = item.get("rank", idx)
+        source = item.get("source", "unknown")
+        news_id = item.get("news_id")
+        title = item.get("title", "")
+        published_at = item.get("published_at", "")
+        source_link = item.get("source_link", "")
+
+        print(f"\n[{rank}/10] Processing {source.upper()}: {title[:50]}...")
+
+        processed_item = {
+            "id": news_id,
+            "source": source,
+            "title": title,
+            "published_at": published_at,
+            "source_link": source_link,
+            "summary": None,
+        }
+
+        if source == "website":
+            # Use stored summary from daily_ranked_news
+            summary = item.get("summary") or ""
+            processed_item["summary"] = summary
+            if summary:
+                print(f"   ✓ Using stored summary ({len(summary)} characters)")
+            else:
+                print(f"   ⚠ No summary available for this news item")
+
+        elif source == "youtube":
+            # Get video ID and look up transcript
+            video_id = item.get("video_id")
+
+            if not video_id:
+                print(f"   ✗ No video_id found for news item {news_id}")
+                processed_item["summary"] = "Video transcription unavailable"
+            else:
+                # Check if transcript exists in database
+                transcript_data = get_transcript_by_video_id(video_id)
+
+                if transcript_data and transcript_data.get("transcript"):
+                    # Transcript exists, summarize it
+                    transcript = transcript_data["transcript"]
+                    print(f"   ✓ Found transcript ({len(transcript)} characters)")
+
+                    summary = summarize_with_gemini(transcript)
+
+                    if summary:
+                        processed_item["summary"] = summary
+                    else:
+                        processed_item["summary"] = "Summary generation failed"
+                else:
+                    # No transcript yet - job may be pending or not created
+                    print(f"   ⏳ No transcript found for video {video_id} (may be pending)")
+                    processed_item["summary"] = "Transcription pending - waiting for worker"
+
+        processed_news.append(processed_item)
+
+    return processed_news
+
+
+def process_top_news(top_n: int = 10, ranked_news: list | None = None, combined_news: list | None = None):
     """
     Process top N ranked news items:
     - For websites: use existing summary
@@ -88,30 +191,32 @@ def process_top_news(top_n: int = 11):
     print("PROCESSING TOP NEWS")
     print("="*50)
     
-    # Load ranked news
+    # Load ranked news (from memory if provided, otherwise from JSON artifact)
     print("\n📊 Loading ranked news...")
-    ranked_news = load_ranked_news()
+    if ranked_news is None:
+        ranked_news = load_ranked_news()
     
     if not ranked_news:
         print("✗ No ranked news found")
         return []
     
-    # Get top N
+    # Get top N from the ranked list provided by Gemini
     top_ranked = ranked_news[:top_n]
     print(f"✓ Found {len(top_ranked)} top ranked news items")
     
-    # Load combined news for full data
+    # Load combined news for full data (from memory if provided, otherwise from JSON)
     print("\n📰 Loading combined news data...")
-    all_news = load_combined_news()
+    if combined_news is None:
+        combined_news = load_combined_news()
     
-    if not all_news:
+    if not combined_news:
         print("✗ No combined news found")
         return []
     
     # Create a mapping by ID for quick lookup
-    news_by_id = {item.get("id"): item for item in all_news}
+    news_by_id = {item.get("id"): item for item in combined_news}
     
-    print(f"✓ Loaded {len(all_news)} news items")
+    print(f"✓ Loaded {len(combined_news)} news items")
     
     # Process each top news item
     processed_news = []
@@ -183,15 +288,31 @@ def process_top_news(top_n: int = 11):
     return processed_news
 
 def save_top_news(processed_news: list, output_file: str = "top_news.json"):
-    """Save processed top news to JSON file."""
-    from utils import save_json_file
+    """Save processed top news to JSON file and daily_top_news table."""
+    from datetime import datetime
+    from core.utils import save_json_file
+
     output_data = {
         "total_items": len(processed_news),
         "news": processed_news
     }
+
+    # Write JSON artifact (kept for debugging / backward compatibility)
     success = save_json_file(output_file, output_data)
     if success:
         print(f"\n✓ Saved top news to: {output_file}")
+
+    # Also persist to database as the new source of truth
+    try:
+        today_utc = datetime.utcnow().date()
+        db_id = create_daily_top_news(today_utc, processed_news)
+        if db_id is not None:
+            print(f"✓ Saved daily top news in database with id={db_id} for {today_utc}")
+        else:
+            print("✗ Failed to save daily top news in database")
+    except Exception as e:
+        print(f"✗ Error saving daily top news in database: {e}")
+
     return success
 
 if __name__ == "__main__":
@@ -202,8 +323,8 @@ if __name__ == "__main__":
             print("   Please set GEMINI_API_KEY in your .env file")
             exit(1)
         
-        # Process top 11 news
-        processed_news = process_top_news(top_n=11)
+        # Process top 10 news
+        processed_news = process_top_news(top_n=10)
         
         if processed_news:
             # Save to file

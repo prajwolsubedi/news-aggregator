@@ -8,13 +8,25 @@ from email.mime.text import MIMEText
 
 from dotenv import load_dotenv
 
-import models
+from core import models
+from core.utils import load_json_file, get_news_from_json
+from core.database import get_latest_daily_top_news
 
 load_dotenv()
 
 def load_top_news(json_file: str = "top_news.json"):
-    """Load top news from JSON file."""
-    from utils import load_json_file, get_news_from_json
+    """Load top news, preferring the latest entry from daily_top_news table.
+
+    Falls back to top_news.json for backward compatibility if no DB row exists.
+    """
+    # First try database-backed daily_top_news
+    latest = get_latest_daily_top_news()
+    if latest and latest.get("top_items"):
+        print("✓ Loaded top news from daily_top_news table")
+        return latest["top_items"]
+
+    # Fallback to JSON artifact
+    print("⚠ No daily_top_news found in DB, falling back to top_news.json")
     data = load_json_file(json_file)
     return get_news_from_json(data) if data else []
 

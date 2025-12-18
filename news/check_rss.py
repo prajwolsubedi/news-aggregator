@@ -4,6 +4,8 @@ import re
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
 
+from core.utils import save_json_file
+
 
 AI_KEYWORDS = [
     # Core AI terms
@@ -30,6 +32,7 @@ AI_KEYWORDS = [
     "ai alignment", "ai safety", "ai regulation", "ai governance",
     "hallucination", "ai bias", "adversarial", "prompt injection"
 ]
+
 
 def is_within_last_24_hours(entry, window_start, now_utc):
     if not entry.get("published_parsed"):
@@ -58,6 +61,7 @@ def is_ai_related(entry):
     
     return False
 
+
 def extract_news(entry):
     published = None
     if entry.get("published_parsed"):
@@ -78,6 +82,7 @@ def extract_news(entry):
         "summary": summary_text,
         "source_link": source_link,
     }
+
 
 def fetch_rss_news():
     """Fetch AI-related news from RSS feed within the last 24 hours."""
@@ -100,12 +105,12 @@ def fetch_rss_news():
                 ai_news_last_24h.append(news_item)
 
     # Save to JSON files
-    from utils import save_json_file
     save_json_file("ai_news.json", ai_news)
     save_json_file("all_news.json", all_news)
     save_json_file("ai_news_last_24h.json", ai_news_last_24h)
 
     return ai_news_last_24h
+
 
 if __name__ == "__main__":
     ai_news_last_24h = fetch_rss_news()
