@@ -9,10 +9,7 @@ from flask import Flask, jsonify, render_template, request, Response
 from core import database, models
 from email_templates import get_welcome_email, get_unsubscribe_email, get_welcome_with_news_email
 from send_email import validate_email, _build_unsubscribe_url, send_raw_html_email, send_email, load_top_news
-from transcription.cleanup_jobs import cleanup_stale_jobs
 from transcription.transcription_jobs import get_pending_jobs, claim_jobs
-from ranking.rank_news import get_top_news
-from news.combine_news import combine_news
 
 load_dotenv()
 
