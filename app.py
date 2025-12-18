@@ -10,6 +10,8 @@ from core import database, models
 from email_templates import get_welcome_email, get_unsubscribe_email, get_welcome_with_news_email
 from send_email import validate_email, _build_unsubscribe_url, send_raw_html_email, send_email, load_top_news
 from transcription.transcription_jobs import get_pending_jobs, claim_jobs
+from preprocess_jobs import preprocess_and_create_jobs
+from run_pipeline import main as run_pipeline_main
 
 load_dotenv()
 
@@ -322,6 +324,74 @@ def upload_all_transcripts() -> Tuple[Response, int]:
             
     except Exception as e:
         return _error_response(f"Error processing transcripts: {str(e)}", 500)
+
+
+def _verify_cron_token() -> bool:
+    """Verify the cron secret token from X-Cron-Token header."""
+    cron_token = request.headers.get("X-Cron-Token", "")
+    expected_token = os.getenv("CRON_SECRET")
+    
+    if not expected_token:
+        logging.error("CRON_SECRET not set in environment")
+        return False
+    
+    return cron_token == expected_token
+
+
+@app.route("/internal/run-preprocess", methods=["POST"])
+def run_preprocess() -> Tuple[Response, int]:
+    """
+    Internal endpoint for GitHub Actions to trigger preprocessing.
+    Protected with secret token.
+    
+    Runs at 08:30 NPT (02:45 UTC) daily.
+    """
+    if not _verify_cron_token():
+        logging.warning("Unauthorized attempt to access /internal/run-preprocess")
+        return _error_response("Unauthorized", 401)
+    
+    try:
+        logging.info("Starting preprocessing job triggered by GitHub Actions...")
+        success = preprocess_and_create_jobs()
+        
+        if success:
+            logging.info("Preprocessing completed successfully")
+            return _success_response({"status": "success", "message": "Preprocessing completed"}), 200
+        else:
+            logging.error("Preprocessing failed")
+            return _error_response("Preprocessing failed", 500)
+            
+    except Exception as e:
+        logging.exception("Error in preprocessing job")
+        return _error_response(f"Error: {str(e)}", 500)
+
+
+@app.route("/internal/run-pipeline", methods=["POST"])
+def run_pipeline() -> Tuple[Response, int]:
+    """
+    Internal endpoint for GitHub Actions to trigger the main pipeline.
+    Protected with secret token.
+    
+    Runs at 09:00 NPT (03:15 UTC) daily.
+    """
+    if not _verify_cron_token():
+        logging.warning("Unauthorized attempt to access /internal/run-pipeline")
+        return _error_response("Unauthorized", 401)
+    
+    try:
+        logging.info("Starting pipeline run triggered by GitHub Actions...")
+        success = run_pipeline_main()
+        
+        if success:
+            logging.info("Pipeline completed successfully")
+            return _success_response({"status": "success", "message": "Pipeline completed"}), 200
+        else:
+            logging.error("Pipeline failed")
+            return _error_response("Pipeline failed", 500)
+            
+    except Exception as e:
+        logging.exception("Error in pipeline run")
+        return _error_response(f"Error: {str(e)}", 500)
 
 
 if __name__ == "__main__":

@@ -24,7 +24,5 @@ beautifulsoup4>=4.12.0
 # HTTP Requests (for tests and API calls)
 requests>=2.28.0
 
-# Scheduler
-APScheduler>=3.10.0
-
 # Note: Email uses built-in smtplib (no additional packages needed)
+# Note: Scheduling is handled by GitHub Actions, not APScheduler
