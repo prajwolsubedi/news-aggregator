@@ -122,11 +122,20 @@ GitHub Actions (Scheduler)
 ├── trigger-preprocess.yml (02:45 UTC = 08:30 NPT)
 │   └── POST /internal/run-preprocess
 │       └── Calls preprocess_and_create_jobs()
+│           └── Uses in-memory data (ephemeral filesystem compatible)
 │
 └── trigger-pipeline.yml (03:15 UTC = 09:00 NPT)
     └── POST /internal/run-pipeline
         └── Calls run_pipeline.main()
 ```
+
+## Technical Notes
+
+### Ephemeral Filesystem (Render Free Tier)
+
+- **JSON files are saved for debugging** but code uses **in-memory data** for reliability
+- `preprocess_jobs.py` uses data directly from `combine_news()` return value
+- This ensures compatibility with Render's ephemeral filesystem where files may not persist
 
 ## ✅ Everything is Ready!
 

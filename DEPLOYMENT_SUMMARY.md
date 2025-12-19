@@ -92,6 +92,7 @@
 - **Scheduler:** GitHub Actions triggers at **08:30 NPT** (preprocess) and **09:00 NPT** (pipeline)
 - **Architecture:** GitHub Actions → HTTP POST → Render Flask endpoints
 - **Security:** Internal endpoints protected with `CRON_SECRET` token
+- **Filesystem:** Code uses in-memory data instead of JSON files for reliability on ephemeral filesystem
 - Free tier services may spin down after inactivity
 - First request after spin-down may be slow
 - Database connections are managed automatically by Render

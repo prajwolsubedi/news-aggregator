@@ -106,6 +106,14 @@ Set these in Render dashboard:
 - Verify scheduled jobs run successfully
 - Monitor email sending success rate
 
+## Technical Implementation Notes
+
+### Ephemeral Filesystem Handling
+
+- **Preprocessing** (`preprocess_jobs.py`): Uses in-memory data from `combine_news()` instead of loading from JSON files
+- This ensures reliability on Render's free tier where filesystem is ephemeral
+- JSON files are still created for debugging but are not required for operation
+
 ## Troubleshooting
 
 ### Common Issues

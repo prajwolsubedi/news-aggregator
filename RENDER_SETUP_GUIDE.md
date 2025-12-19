@@ -149,6 +149,12 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 - Token must match `CRON_SECRET` environment variable
 - Only GitHub Actions can trigger these endpoints
 
+### Implementation Details
+
+- **Preprocessing** uses in-memory data (not JSON files) for reliability on ephemeral filesystem
+- JSON files are still created for debugging but code doesn't depend on them
+- This ensures compatibility with Render's free tier filesystem limitations
+
 ### Workflow Files
 
 Two separate workflow files for better organization:
