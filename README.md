@@ -9,7 +9,8 @@ An intelligent news aggregator that collects AI-related news from RSS feeds and 
 - 🤖 **AI-Powered Ranking**: Uses Google Gemini to rank news by importance/hotness
 - 📝 **Smart Summarization**:
   - Website news: Uses existing summaries
-  - YouTube videos: Transcribes and summarizes using AI
+  - YouTube videos: Transcribes and summarizes using AI (via distributed worker system)
+- 🔄 **Automatic Job Recovery**: Stale transcription jobs (claimed but not completed) are automatically reset after 30 minutes, preventing jobs from getting permanently stuck
 - 🎯 **Top News Selection**: Automatically selects and processes top-ranked news items
 - 🌐 **Web Interface**: Simple subscription form for users to sign up
 - 📧 **Email System**: Automated daily emails sent at 9am to all subscribers

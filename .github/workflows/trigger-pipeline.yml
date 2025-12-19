@@ -2,9 +2,12 @@ name: Trigger Newsletter Pipeline on Render
 
 on:
   schedule:
-    # 03:15 UTC == 09:00 NPT
+    # 13:10 NPT == 07:25 UTC
     # Nepal Standard Time is UTC+5:45
-    - cron: "15 3 * * *"
+    - cron: "25 7 * * *"
+    # TODO: Re-enable 9:00 NPT schedule later
+    # 03:15 UTC == 09:00 NPT
+    # - cron: "15 3 * * *"
   workflow_dispatch: # Allow manual triggering
 
 jobs:

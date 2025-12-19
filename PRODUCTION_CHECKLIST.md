@@ -114,6 +114,13 @@ Set these in Render dashboard:
 - This ensures reliability on Render's free tier where filesystem is ephemeral
 - JSON files are still created for debugging but are not required for operation
 
+### Transcription Job Recovery
+
+- **Automatic Stale Job Recovery**: The system automatically resets transcription jobs that remain in `CLAIMED` status for more than 30 minutes back to `PENDING`
+- This prevents jobs from getting permanently stuck if a worker crashes or fails during processing
+- Recovery happens automatically when workers request jobs via `/api/get-videos` endpoint
+- No manual intervention needed - stuck jobs are automatically retried
+
 ## Troubleshooting
 
 ### Common Issues
