@@ -9,7 +9,6 @@ load_dotenv()
 # API Keys
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
-SERP_API_KEY = os.getenv("SERP_API_KEY")
 
 # Database
 DATABASE_URL = os.getenv("DATABASE_URL")

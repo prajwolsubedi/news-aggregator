@@ -356,7 +356,7 @@ def run_preprocess() -> Tuple[Response, int]:
         
         if success:
             logging.info("Preprocessing completed successfully")
-            return _success_response({"status": "success", "message": "Preprocessing completed"}), 200
+            return _success_response({"status": "success", "message": "Preprocessing completed"})
         else:
             logging.error("Preprocessing failed")
             return _error_response("Preprocessing failed", 500)
@@ -384,7 +384,7 @@ def run_pipeline() -> Tuple[Response, int]:
         
         if success:
             logging.info("Pipeline completed successfully")
-            return _success_response({"status": "success", "message": "Pipeline completed"}), 200
+            return _success_response({"status": "success", "message": "Pipeline completed"})
         else:
             logging.error("Pipeline failed")
             return _error_response("Pipeline failed", 500)
