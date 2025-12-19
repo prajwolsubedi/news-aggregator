@@ -129,14 +129,6 @@ GitHub Actions (Scheduler)
         └── Calls run_pipeline.main()
 ```
 
-## Technical Notes
-
-### Ephemeral Filesystem (Render Free Tier)
-
-- **JSON files are saved for debugging** but code uses **in-memory data** for reliability
-- `preprocess_jobs.py` uses data directly from `combine_news()` return value
-- This ensures compatibility with Render's ephemeral filesystem where files may not persist
-
 ## ✅ Everything is Ready!
 
 Your project is production-ready. All components are configured correctly:

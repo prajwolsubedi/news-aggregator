@@ -32,10 +32,18 @@ def create_transcription_job(video_id: str, video_url: str, video_title: str | N
 
 
 def get_pending_jobs(limit: int = 10) -> list[dict]:
-    """Get pending transcription jobs (for workers to pull)."""
+    """Get pending transcription jobs (for workers to pull).
+    
+    Returns jobs with status 'PENDING' or stale 'CLAIMED' jobs (claimed > 30 minutes ago).
+    This allows automatic retry of jobs that were claimed but never completed.
+    """
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            # First, reset stale CLAIMED jobs back to PENDING
+            reset_stale_jobs(timeout_minutes=30)
+            
+            # Then get PENDING jobs (including freshly reset ones)
             cursor.execute(
                 """
                 SELECT job_id, video_id, video_url, video_title, priority
