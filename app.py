@@ -379,29 +379,45 @@ def run_pipeline() -> Tuple[Response, int]:
         return _error_response("Unauthorized", 401)
     
     try:
+        logging.info("="*60)
+        logging.info("PIPELINE RUN STARTED")
+        logging.info("="*60)
         logging.info("Starting pipeline run triggered by GitHub Actions...")
         success = run_pipeline_main()
+        logging.info(f"Pipeline main() returned: {success}")
         
         if success:
-            logging.info("Pipeline completed successfully")
+            logging.info("="*60)
+            logging.info("PIPELINE COMPLETED SUCCESSFULLY")
+            logging.info("="*60)
             return _success_response({"status": "success", "message": "Pipeline completed"})
         else:
             logging.error("="*60)
-            logging.error("Pipeline failed - check logs above for details")
+            logging.error("PIPELINE FAILED - DIAGNOSTIC SUMMARY")
+            logging.error("="*60)
+            logging.error("Pipeline main() returned False")
+            logging.error("")
+            logging.error("SEARCH LOGS FOR THESE PREFIXES TO FIND THE ERROR:")
+            logging.error("  - [PIPELINE] - Pipeline step-by-step progress")
+            logging.error("  - [EMAIL] - Email sending details")
+            logging.error("")
             logging.error("Common causes:")
             logging.error("  1. Email sending failed (check SENDER_EMAIL and SENDER_PASSWORD)")
             logging.error("  2. SMTP authentication error (Gmail requires App Password)")
             logging.error("  3. SMTP connection timeout or server error")
             logging.error("  4. No active subscribers found")
+            logging.error("  5. No ranked news found (preprocess step didn't run)")
             logging.error("="*60)
-            return _error_response("Pipeline failed - check server logs for details", 500)
+            return _error_response("Pipeline failed - check server logs for [PIPELINE] and [EMAIL] prefixes", 500)
             
     except Exception as e:
-        logging.exception("="*60)
+        logging.error("="*60)
+        logging.error("PIPELINE EXCEPTION - DIAGNOSTIC SUMMARY")
+        logging.error("="*60)
         logging.exception("Exception in pipeline run endpoint")
-        logging.exception(f"Error type: {type(e).__name__}")
-        logging.exception(f"Error message: {str(e)}")
-        logging.exception("="*60)
+        logging.error(f"Error type: {type(e).__name__}")
+        logging.error(f"Error message: {str(e)}")
+        logging.error("="*60)
         return _error_response(f"Error: {str(e)}", 500)
 
 

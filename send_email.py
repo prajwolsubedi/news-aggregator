@@ -517,9 +517,24 @@ def send_email(news_items: list, recipient_email: str, unsubscribe_url: str | No
         print("   For Gmail, you may need to use an App Password instead of your regular password.")
         logger.error(error_msg, exc_info=True)
         logger.error(f"SMTP Server: {smtp_server}, Port: {smtp_port}, Sender: {sender_email}")
-        root_logger.error(f"[EMAIL] SMTP Authentication failed for {recipient_email}: {e}")
-        root_logger.error(f"[EMAIL] SMTP Server: {smtp_server}, Port: {smtp_port}, Sender: {sender_email}")
+        root_logger.error("="*60)
+        root_logger.error("[EMAIL] SMTP AUTHENTICATION FAILED")
+        root_logger.error("="*60)
+        root_logger.error(f"[EMAIL] Recipient: {recipient_email}")
+        root_logger.error(f"[EMAIL] Error: {e}")
+        root_logger.error(f"[EMAIL] SMTP Server: {smtp_server}")
+        root_logger.error(f"[EMAIL] SMTP Port: {smtp_port}")
+        root_logger.error(f"[EMAIL] Sender: {sender_email}")
         root_logger.error("[EMAIL] For Gmail, use an App Password instead of regular password")
+        root_logger.error("="*60)
+        print("="*60)
+        print("[EMAIL] SMTP AUTHENTICATION FAILED")
+        print("="*60)
+        print(f"[EMAIL] Recipient: {recipient_email}")
+        print(f"[EMAIL] Error: {e}")
+        print(f"[EMAIL] SMTP Server: {smtp_server}, Port: {smtp_port}, Sender: {sender_email}")
+        print("[EMAIL] For Gmail, use an App Password instead of regular password")
+        print("="*60)
         return False
     except smtplib.SMTPException as e:
         error_msg = f"✗ SMTP error sending email to {recipient_email}: {e}"
@@ -548,26 +563,50 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
     logger.info("="*60)
     logger.info("EMAIL SENDING - STARTING")
     logger.info("="*60)
-    root_logger.info("[EMAIL] ============================================================")
+    root_logger.info("="*60)
     root_logger.info("[EMAIL] EMAIL SENDING - STARTING")
-    root_logger.info("[EMAIL] ============================================================")
+    root_logger.info("="*60)
+    root_logger.info(f"[EMAIL] Function called with {len(news_items) if news_items else 0} news items")
+    # Also print to stdout (Render captures this)
+    print("="*60)
+    print("[EMAIL] EMAIL SENDING - STARTING")
+    print("="*60)
+    print(f"[EMAIL] Function called with {len(news_items) if news_items else 0} news items")
     
-    subscribers = models.get_all_active_subscribers()
-    subscriber_count = len(subscribers) if subscribers else 0
-    logger.info(f"Retrieved {subscriber_count} subscribers from database")
-    root_logger.info(f"[EMAIL] Retrieved {subscriber_count} subscribers from database")
+    try:
+        subscribers = models.get_all_active_subscribers()
+        subscriber_count = len(subscribers) if subscribers else 0
+        logger.info(f"Retrieved {subscriber_count} subscribers from database")
+        root_logger.info(f"[EMAIL] Retrieved {subscriber_count} subscribers from database")
+        print(f"[EMAIL] Retrieved {subscriber_count} subscribers from database")
+    except Exception as e:
+        error_msg = f"[EMAIL] ERROR getting subscribers from database: {type(e).__name__}: {e}"
+        root_logger.error(error_msg)
+        print(error_msg)
+        root_logger.error(f"[EMAIL] Traceback:")
+        import traceback as tb
+        for line in tb.format_exc().split('\n'):
+            if line.strip():
+                root_logger.error(f"[EMAIL] {line}")
+                print(f"[EMAIL] {line}")
+        raise
 
     if not subscribers:
         error_msg = "✗ No active subscribers found. No emails sent."
         print(error_msg)
         logger.error(error_msg)
+        root_logger.error("="*60)
         root_logger.error("[EMAIL] ✗ No active subscribers found. No emails sent.")
-        logger.error("="*60)
+        root_logger.error("="*60)
+        print("="*60)
+        print("[EMAIL] ✗ No active subscribers found. No emails sent.")
+        print("="*60)
         return False
 
     print(f"📧 Sending news to {len(subscribers)} active subscribers...")
     logger.info(f"Starting to send emails to {len(subscribers)} subscribers")
     root_logger.info(f"[EMAIL] Starting to send emails to {len(subscribers)} subscribers")
+    print(f"[EMAIL] Starting to send emails to {len(subscribers)} subscribers")
     
     # Check email configuration before starting
     sender_email = os.getenv("SENDER_EMAIL")
@@ -577,6 +616,8 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
     logger.info(f"SENDER_PASSWORD configured: {'Yes' if sender_password else 'No'}")
     root_logger.info(f"[EMAIL] SENDER_EMAIL configured: {'Yes' if sender_email else 'No'}")
     root_logger.info(f"[EMAIL] SENDER_PASSWORD configured: {'Yes' if sender_password else 'No'}")
+    print(f"[EMAIL] SENDER_EMAIL configured: {'Yes' if sender_email else 'No'}")
+    print(f"[EMAIL] SENDER_PASSWORD configured: {'Yes' if sender_password else 'No'}")
     
     if not sender_email or not sender_password:
         error_msg = "✗ SENDER_EMAIL or SENDER_PASSWORD not set in environment variables"
@@ -593,7 +634,14 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
         root_logger.error(f"[EMAIL] {error_msg}")
         root_logger.error(f"[EMAIL] SENDER_EMAIL: {'SET' if sender_email else 'NOT SET'}")
         root_logger.error(f"[EMAIL] SENDER_PASSWORD: {'SET' if sender_password else 'NOT SET'}")
-        logger.error("="*60)
+        root_logger.error("="*60)
+        print("="*60)
+        print("[EMAIL] EMAIL CONFIGURATION ERROR")
+        print("="*60)
+        print(f"[EMAIL] {error_msg}")
+        print(f"[EMAIL] SENDER_EMAIL: {'SET' if sender_email else 'NOT SET'}")
+        print(f"[EMAIL] SENDER_PASSWORD: {'SET' if sender_password else 'NOT SET'}")
+        print("="*60)
         return False
     
     logger.info(f"Using sender email: {sender_email}")
@@ -602,6 +650,9 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
     root_logger.info(f"[EMAIL] Using sender email: {sender_email}")
     root_logger.info(f"[EMAIL] SMTP Server: {os.getenv('SMTP_SERVER', 'smtp.gmail.com')}")
     root_logger.info(f"[EMAIL] SMTP Port: {os.getenv('SMTP_PORT', '587')}")
+    print(f"[EMAIL] Using sender email: {sender_email}")
+    print(f"[EMAIL] SMTP Server: {os.getenv('SMTP_SERVER', 'smtp.gmail.com')}")
+    print(f"[EMAIL] SMTP Port: {os.getenv('SMTP_PORT', '587')}")
     
     success_count = 0
     failed_emails = []
@@ -612,20 +663,24 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
         try:
             logger.info(f"[{idx}/{len(subscribers)}] Attempting to send email to {subscriber.email}")
             root_logger.info(f"[EMAIL] [{idx}/{len(subscribers)}] Attempting to send email to {subscriber.email}")
+            print(f"[EMAIL] [{idx}/{len(subscribers)}] Attempting to send email to {subscriber.email}")
             if send_email(news_items, subscriber.email, unsubscribe_url=unsubscribe_url):
                 success_count += 1
                 logger.info(f"[{idx}/{len(subscribers)}] Successfully sent email to {subscriber.email}")
                 root_logger.info(f"[EMAIL] [{idx}/{len(subscribers)}] ✓ Successfully sent email to {subscriber.email}")
+                print(f"[EMAIL] [{idx}/{len(subscribers)}] ✓ Successfully sent email to {subscriber.email}")
             else:
                 failed_emails.append(subscriber.email)
                 error_details.append(f"{subscriber.email}: send_email returned False")
                 logger.warning(f"[{idx}/{len(subscribers)}] Failed to send email to {subscriber.email} - send_email returned False")
                 root_logger.warning(f"[EMAIL] [{idx}/{len(subscribers)}] ✗ Failed to send email to {subscriber.email} - send_email returned False")
+                print(f"[EMAIL] [{idx}/{len(subscribers)}] ✗ Failed to send email to {subscriber.email} - send_email returned False")
         except Exception as e:
             failed_emails.append(subscriber.email)
             error_details.append(f"{subscriber.email}: {str(e)}")
             logger.error(f"[{idx}/{len(subscribers)}] Exception sending email to {subscriber.email}: {e}", exc_info=True)
             root_logger.error(f"[EMAIL] [{idx}/{len(subscribers)}] Exception sending email to {subscriber.email}: {e}", exc_info=True)
+            print(f"[EMAIL] [{idx}/{len(subscribers)}] EXCEPTION: {type(e).__name__}: {e}")
 
     result_msg = f"✓ Finished sending emails. Success: {success_count}/{len(subscribers)}"
     print(result_msg)
@@ -633,6 +688,10 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
     logger.info("EMAIL SENDING - COMPLETED")
     logger.info("="*60)
     logger.info(result_msg)
+    root_logger.info("="*60)
+    root_logger.info("[EMAIL] EMAIL SENDING - COMPLETED")
+    root_logger.info("="*60)
+    root_logger.info(f"[EMAIL] {result_msg}")
     
     if failed_emails:
         error_summary = f"Failed to send emails to {len(failed_emails)}/{len(subscribers)} subscribers"
@@ -661,6 +720,19 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
         for detail in error_details[:5]:
             root_logger.error(f"[EMAIL]   - {detail}")
         root_logger.error("="*60)
+        # Also print to stdout
+        print("="*60)
+        print("[EMAIL] EMAIL SENDING FAILURE SUMMARY")
+        print("="*60)
+        print(f"[EMAIL] {error_summary}")
+        print(f"[EMAIL] Total subscribers: {len(subscribers)}")
+        print(f"[EMAIL] Successful sends: {success_count}")
+        print(f"[EMAIL] Failed sends: {len(failed_emails)}")
+        print(f"[EMAIL] Failed email addresses (first 10): {failed_emails[:10]}")
+        print(f"[EMAIL] Error details (first 5):")
+        for detail in error_details[:5]:
+            print(f"[EMAIL]   - {detail}")
+        print("="*60)
         print(f"✗ {error_summary}")
     elif success_count == 0:
         logger.error("="*60)
@@ -684,6 +756,17 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
         root_logger.error("[EMAIL]   2. SMTP server connection failed")
         root_logger.error("[EMAIL]   3. All email addresses are invalid")
         root_logger.error("="*60)
+        # Also print to stdout
+        print("="*60)
+        print("[EMAIL] EMAIL SENDING FAILURE - NO EMAILS SENT")
+        print("="*60)
+        print(f"[EMAIL] Total subscribers: {len(subscribers)}")
+        print("[EMAIL] All email attempts returned False - check SMTP configuration")
+        print("[EMAIL] This usually means:")
+        print("[EMAIL]   1. SMTP authentication failed (wrong password/app password)")
+        print("[EMAIL]   2. SMTP server connection failed")
+        print("[EMAIL]   3. All email addresses are invalid")
+        print("="*60)
     
     return success_count > 0
 
