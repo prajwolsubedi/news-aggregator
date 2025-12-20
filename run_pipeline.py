@@ -107,10 +107,10 @@ def main():
                 root_logger.error(f"[PIPELINE] {error_msg}")
                 root_logger.error("[PIPELINE] Check [EMAIL] logs above for detailed error messages")
                 root_logger.error("[PIPELINE] Common issues:")
-                root_logger.error("[PIPELINE]   1. SMTP authentication failed (check SENDER_PASSWORD is Gmail App Password)")
-                root_logger.error("[PIPELINE]   2. SMTP server connection timeout")
+                root_logger.error("[PIPELINE]   1. RESEND_API_KEY not set or invalid")
+                root_logger.error("[PIPELINE]   2. Domain not verified in Resend dashboard")
                 root_logger.error("[PIPELINE]   3. No active subscribers in database")
-                root_logger.error("[PIPELINE]   4. Invalid email addresses in subscriber list")
+                root_logger.error("[PIPELINE]   4. Resend API rate limit exceeded")
                 root_logger.error("="*60)
                 return False
         except Exception as e:
