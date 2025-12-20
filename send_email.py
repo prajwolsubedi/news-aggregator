@@ -437,8 +437,9 @@ def send_raw_html_email(recipient_email: str, subject: str, html_content: str) -
         
         result = resend.Emails.send(params)
         
-        if result and hasattr(result, 'id'):
-            root_logger.info(f"[EMAIL] Transactional email sent to {recipient_email} (ID: {result.id})")
+        # Resend API returns a dict with 'id' key on success
+        if result and isinstance(result, dict) and 'id' in result:
+            root_logger.info(f"[EMAIL] Transactional email sent to {recipient_email} (ID: {result['id']})")
             return True
         else:
             root_logger.error(f"[EMAIL] Resend API returned unexpected response: {result}")
@@ -499,8 +500,9 @@ def send_email(news_items: list, recipient_email: str, unsubscribe_url: str | No
         
         result = resend.Emails.send(params)
         
-        if result and hasattr(result, 'id'):
-            root_logger.info(f"[EMAIL] Email sent to {recipient_email} (ID: {result.id})")
+        # Resend API returns a dict with 'id' key on success
+        if result and isinstance(result, dict) and 'id' in result:
+            root_logger.info(f"[EMAIL] Email sent to {recipient_email} (ID: {result['id']})")
             return True
         else:
             root_logger.error(f"[EMAIL] Resend API returned unexpected response: {result}")
