@@ -409,34 +409,23 @@ def send_raw_html_email(recipient_email: str, subject: str, html_content: str) -
     reply_to_email = os.getenv("REPLY_TO_EMAIL", "prajwolsubedi@gmail.com")
 
     if not resend_api_key:
-        print("✗ Error: RESEND_API_KEY must be set in environment variables")
-        logger.error("[EMAIL] RESEND_API_KEY not set in environment variables")
         root_logger.error("[EMAIL] RESEND_API_KEY not set in environment variables")
         return False
 
     if not recipient_email:
-        print("✗ Error: Recipient email not provided")
+        root_logger.error("[EMAIL] Recipient email not provided")
         return False
 
     if not validate_email(recipient_email):
-        print(f"✗ Error: Invalid email format for transactional email: {recipient_email}")
+        root_logger.error(f"[EMAIL] Invalid email format: {recipient_email}")
         return False
 
     try:
-        print(f"\n📧 Preparing transactional email to {recipient_email}...")
-        logger.info(f"[EMAIL] Preparing transactional email to {recipient_email}")
-        root_logger.info(f"[EMAIL] Preparing transactional email to {recipient_email}")
-
         # Set Resend API key
         resend.api_key = resend_api_key
 
         # Format sender email with display name
         from_email = f"AI News <{sender_email}>" if "@" in sender_email else sender_email
-
-        # Send email via Resend API
-        print("📤 Sending email via Resend API...")
-        logger.info("[EMAIL] Sending email via Resend API")
-        root_logger.info("[EMAIL] Sending email via Resend API")
         
         params = {
             "from": from_email,
@@ -449,22 +438,14 @@ def send_raw_html_email(recipient_email: str, subject: str, html_content: str) -
         result = resend.Emails.send(params)
         
         if result and hasattr(result, 'id'):
-            print(f"✓ Transactional email sent successfully to {recipient_email}! (ID: {result.id})")
-            logger.info(f"[EMAIL] Transactional email sent successfully to {recipient_email} (ID: {result.id})")
-            root_logger.info(f"[EMAIL] Transactional email sent successfully to {recipient_email} (ID: {result.id})")
+            root_logger.info(f"[EMAIL] Transactional email sent to {recipient_email} (ID: {result.id})")
             return True
         else:
-            error_msg = f"✗ Error: Resend API returned unexpected response: {result}"
-            print(error_msg)
-            logger.error(f"[EMAIL] Resend API returned unexpected response: {result}")
             root_logger.error(f"[EMAIL] Resend API returned unexpected response: {result}")
             return False
             
     except Exception as e:
-        error_msg = f"✗ Error sending transactional email: {type(e).__name__}: {e}"
-        print(error_msg)
-        logger.error(f"[EMAIL] Error sending transactional email: {e}", exc_info=True)
-        root_logger.error(f"[EMAIL] Error sending transactional email: {type(e).__name__}: {e}")
+        root_logger.error(f"[EMAIL] Error sending transactional email to {recipient_email}: {type(e).__name__}: {e}", exc_info=True)
         return False
 
 
@@ -477,34 +458,26 @@ def send_email(news_items: list, recipient_email: str, unsubscribe_url: str | No
     reply_to_email = os.getenv("REPLY_TO_EMAIL", "prajwolsubedi@gmail.com")
     
     if not resend_api_key:
-        print("✗ Error: RESEND_API_KEY must be set in environment variables")
-        logger.error("[EMAIL] RESEND_API_KEY not set in environment variables")
         root_logger.error("[EMAIL] RESEND_API_KEY not set in environment variables")
         return False
     
     if not recipient_email:
-        print("✗ Error: Recipient email not provided")
+        root_logger.error("[EMAIL] Recipient email not provided")
         return False
     
     # Validate email format
     if not validate_email(recipient_email):
-        print(f"✗ Error: Invalid email format: {recipient_email}")
-        print("   Please provide a valid email address (e.g., yourname@gmail.com)")
+        root_logger.error(f"[EMAIL] Invalid email format: {recipient_email}")
         return False
     
     # Check for placeholder domains
     placeholder_domains = ['example.com', 'test.com', 'example.org', 'test.org']
     recipient_domain = recipient_email.split('@')[1].lower() if '@' in recipient_email else ''
     if recipient_domain in placeholder_domains:
-        print(f"✗ Error: '{recipient_email}' is a placeholder email address")
-        print("   Please use a real email address (e.g., yourname@gmail.com)")
+        root_logger.error(f"[EMAIL] Placeholder email address: {recipient_email}")
         return False
     
     try:
-        print(f"\n📧 Preparing email to {recipient_email}...")
-        logger.info(f"[EMAIL] Preparing email to {recipient_email}")
-        root_logger.info(f"[EMAIL] Preparing email to {recipient_email}")
-        
         # Create HTML content
         html_content = create_html_email(news_items, unsubscribe_url=unsubscribe_url)
         
@@ -513,11 +486,6 @@ def send_email(news_items: list, recipient_email: str, unsubscribe_url: str | No
         
         # Format sender email with display name
         from_email = f"AI News <{sender_email}>" if "@" in sender_email else sender_email
-        
-        # Send email via Resend API
-        print("📤 Sending email via Resend API...")
-        logger.info("[EMAIL] Sending email via Resend API")
-        root_logger.info("[EMAIL] Sending email via Resend API")
         
         subject = f"Top AI News - {datetime.now().strftime('%B %d, %Y')}"
         
@@ -532,114 +500,42 @@ def send_email(news_items: list, recipient_email: str, unsubscribe_url: str | No
         result = resend.Emails.send(params)
         
         if result and hasattr(result, 'id'):
-            print(f"✓ Email sent successfully to {recipient_email}! (ID: {result.id})")
-            logger.info(f"[EMAIL] Email sent successfully to {recipient_email} (ID: {result.id})")
-            root_logger.info(f"[EMAIL] Email sent successfully to {recipient_email} (ID: {result.id})")
+            root_logger.info(f"[EMAIL] Email sent to {recipient_email} (ID: {result.id})")
             return True
         else:
-            error_msg = f"✗ Error: Resend API returned unexpected response: {result}"
-            print(error_msg)
-            logger.error(f"[EMAIL] Resend API returned unexpected response: {result}")
             root_logger.error(f"[EMAIL] Resend API returned unexpected response: {result}")
             return False
             
     except Exception as e:
-        error_msg = f"✗ Unexpected error sending email to {recipient_email}: {type(e).__name__}: {e}"
-        print(error_msg)
-        logger.error(f"[EMAIL] Error sending email to {recipient_email}: {e}", exc_info=True)
-        root_logger.error(f"[EMAIL] Unexpected error sending email to {recipient_email}: {type(e).__name__}: {e}")
+        root_logger.error(f"[EMAIL] Error sending email to {recipient_email}: {type(e).__name__}: {e}", exc_info=True)
         return False
 
 
 def send_news_to_all_subscribers(news_items: list) -> bool:
     """Send news email to all active subscribers from the database."""
-    logger.info("="*60)
-    logger.info("EMAIL SENDING - STARTING")
-    logger.info("="*60)
-    root_logger.info("="*60)
-    root_logger.info("[EMAIL] EMAIL SENDING - STARTING")
-    root_logger.info("="*60)
-    root_logger.info(f"[EMAIL] Function called with {len(news_items) if news_items else 0} news items")
-    # Also print to stdout (Render captures this)
-    print("="*60)
-    print("[EMAIL] EMAIL SENDING - STARTING")
-    print("="*60)
-    print(f"[EMAIL] Function called with {len(news_items) if news_items else 0} news items")
+    root_logger.info("[EMAIL] Starting email sending process")
     
     try:
         subscribers = models.get_all_active_subscribers()
         subscriber_count = len(subscribers) if subscribers else 0
-        logger.info(f"Retrieved {subscriber_count} subscribers from database")
         root_logger.info(f"[EMAIL] Retrieved {subscriber_count} subscribers from database")
-        print(f"[EMAIL] Retrieved {subscriber_count} subscribers from database")
     except Exception as e:
-        error_msg = f"[EMAIL] ERROR getting subscribers from database: {type(e).__name__}: {e}"
-        root_logger.error(error_msg)
-        print(error_msg)
-        root_logger.error(f"[EMAIL] Traceback:")
-        import traceback as tb
-        for line in tb.format_exc().split('\n'):
-            if line.strip():
-                root_logger.error(f"[EMAIL] {line}")
-                print(f"[EMAIL] {line}")
+        root_logger.error(f"[EMAIL] Error getting subscribers: {type(e).__name__}: {e}", exc_info=True)
         raise
 
     if not subscribers:
-        error_msg = "✗ No active subscribers found. No emails sent."
-        print(error_msg)
-        logger.error(error_msg)
-        root_logger.error("="*60)
-        root_logger.error("[EMAIL] ✗ No active subscribers found. No emails sent.")
-        root_logger.error("="*60)
-        print("="*60)
-        print("[EMAIL] ✗ No active subscribers found. No emails sent.")
-        print("="*60)
+        root_logger.error("[EMAIL] No active subscribers found")
         return False
 
-    print(f"📧 Sending news to {len(subscribers)} active subscribers...")
-    logger.info(f"Starting to send emails to {len(subscribers)} subscribers")
-    root_logger.info(f"[EMAIL] Starting to send emails to {len(subscribers)} subscribers")
-    print(f"[EMAIL] Starting to send emails to {len(subscribers)} subscribers")
+    root_logger.info(f"[EMAIL] Sending emails to {len(subscribers)} subscribers")
     
     # Check email configuration before starting (Resend API)
     resend_api_key = os.getenv("RESEND_API_KEY")
     sender_email = os.getenv("SENDER_EMAIL", "ainews@prajwolsubedi.com.np")
     
-    logger.info(f"RESEND_API_KEY configured: {'Yes' if resend_api_key else 'No'}")
-    logger.info(f"SENDER_EMAIL configured: {'Yes' if sender_email else 'No'}")
-    root_logger.info(f"[EMAIL] RESEND_API_KEY configured: {'Yes' if resend_api_key else 'No'}")
-    root_logger.info(f"[EMAIL] SENDER_EMAIL configured: {'Yes' if sender_email else 'No'}")
-    print(f"[EMAIL] RESEND_API_KEY configured: {'Yes' if resend_api_key else 'No'}")
-    print(f"[EMAIL] SENDER_EMAIL configured: {'Yes' if sender_email else 'No'}")
-    
     if not resend_api_key:
-        error_msg = "✗ RESEND_API_KEY not set in environment variables"
-        print(error_msg)
-        logger.error("="*60)
-        logger.error("EMAIL CONFIGURATION ERROR")
-        logger.error("="*60)
-        logger.error(error_msg)
-        logger.error(f"RESEND_API_KEY: {'SET' if resend_api_key else 'NOT SET'}")
-        root_logger.error("="*60)
-        root_logger.error("[EMAIL] EMAIL CONFIGURATION ERROR")
-        root_logger.error("="*60)
-        root_logger.error(f"[EMAIL] {error_msg}")
-        root_logger.error(f"[EMAIL] RESEND_API_KEY: {'SET' if resend_api_key else 'NOT SET'}")
-        root_logger.error("="*60)
-        print("="*60)
-        print("[EMAIL] EMAIL CONFIGURATION ERROR")
-        print("="*60)
-        print(f"[EMAIL] {error_msg}")
-        print(f"[EMAIL] RESEND_API_KEY: {'SET' if resend_api_key else 'NOT SET'}")
-        print("="*60)
+        root_logger.error("[EMAIL] RESEND_API_KEY not set in environment variables")
         return False
-    
-    logger.info(f"Using sender email: {sender_email}")
-    logger.info(f"Email service: Resend API")
-    root_logger.info(f"[EMAIL] Using sender email: {sender_email}")
-    root_logger.info(f"[EMAIL] Email service: Resend API")
-    print(f"[EMAIL] Using sender email: {sender_email}")
-    print(f"[EMAIL] Email service: Resend API")
     
     success_count = 0
     failed_emails = []
@@ -648,115 +544,26 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
     for idx, subscriber in enumerate(subscribers, 1):
         unsubscribe_url = _build_unsubscribe_url(subscriber.unsubscribe_token)
         try:
-            logger.info(f"[{idx}/{len(subscribers)}] Attempting to send email to {subscriber.email}")
-            root_logger.info(f"[EMAIL] [{idx}/{len(subscribers)}] Attempting to send email to {subscriber.email}")
-            print(f"[EMAIL] [{idx}/{len(subscribers)}] Attempting to send email to {subscriber.email}")
             if send_email(news_items, subscriber.email, unsubscribe_url=unsubscribe_url):
                 success_count += 1
-                logger.info(f"[{idx}/{len(subscribers)}] Successfully sent email to {subscriber.email}")
-                root_logger.info(f"[EMAIL] [{idx}/{len(subscribers)}] ✓ Successfully sent email to {subscriber.email}")
-                print(f"[EMAIL] [{idx}/{len(subscribers)}] ✓ Successfully sent email to {subscriber.email}")
             else:
                 failed_emails.append(subscriber.email)
                 error_details.append(f"{subscriber.email}: send_email returned False")
-                logger.warning(f"[{idx}/{len(subscribers)}] Failed to send email to {subscriber.email} - send_email returned False")
-                root_logger.warning(f"[EMAIL] [{idx}/{len(subscribers)}] ✗ Failed to send email to {subscriber.email} - send_email returned False")
-                print(f"[EMAIL] [{idx}/{len(subscribers)}] ✗ Failed to send email to {subscriber.email} - send_email returned False")
         except Exception as e:
             failed_emails.append(subscriber.email)
             error_details.append(f"{subscriber.email}: {str(e)}")
-            logger.error(f"[{idx}/{len(subscribers)}] Exception sending email to {subscriber.email}: {e}", exc_info=True)
-            root_logger.error(f"[EMAIL] [{idx}/{len(subscribers)}] Exception sending email to {subscriber.email}: {e}", exc_info=True)
-            print(f"[EMAIL] [{idx}/{len(subscribers)}] EXCEPTION: {type(e).__name__}: {e}")
+            root_logger.error(f"[EMAIL] Exception sending email to {subscriber.email}: {type(e).__name__}: {e}", exc_info=True)
 
-    result_msg = f"✓ Finished sending emails. Success: {success_count}/{len(subscribers)}"
-    print(result_msg)
-    logger.info("="*60)
-    logger.info("EMAIL SENDING - COMPLETED")
-    logger.info("="*60)
-    logger.info(result_msg)
-    root_logger.info("="*60)
-    root_logger.info("[EMAIL] EMAIL SENDING - COMPLETED")
-    root_logger.info("="*60)
-    root_logger.info(f"[EMAIL] {result_msg}")
+    root_logger.info(f"[EMAIL] Finished: {success_count}/{len(subscribers)} emails sent successfully")
     
     if failed_emails:
-        error_summary = f"Failed to send emails to {len(failed_emails)}/{len(subscribers)} subscribers"
-        logger.error("="*60)
-        logger.error("EMAIL SENDING FAILURE SUMMARY")
-        logger.error("="*60)
-        logger.error(error_summary)
-        logger.error(f"Total subscribers: {len(subscribers)}")
-        logger.error(f"Successful sends: {success_count}")
-        logger.error(f"Failed sends: {len(failed_emails)}")
-        logger.error(f"Failed email addresses (first 10): {failed_emails[:10]}")
-        logger.error(f"Error details (first 5):")
-        for detail in error_details[:5]:
-            logger.error(f"  - {detail}")
-        logger.error("="*60)
-        # Also log to root logger for visibility
-        root_logger.error("="*60)
-        root_logger.error("[EMAIL] EMAIL SENDING FAILURE SUMMARY")
-        root_logger.error("="*60)
-        root_logger.error(f"[EMAIL] {error_summary}")
-        root_logger.error(f"[EMAIL] Total subscribers: {len(subscribers)}")
-        root_logger.error(f"[EMAIL] Successful sends: {success_count}")
-        root_logger.error(f"[EMAIL] Failed sends: {len(failed_emails)}")
-        root_logger.error(f"[EMAIL] Failed email addresses (first 10): {failed_emails[:10]}")
-        root_logger.error(f"[EMAIL] Error details (first 5):")
-        for detail in error_details[:5]:
-            root_logger.error(f"[EMAIL]   - {detail}")
-        root_logger.error("="*60)
-        # Also print to stdout
-        print("="*60)
-        print("[EMAIL] EMAIL SENDING FAILURE SUMMARY")
-        print("="*60)
-        print(f"[EMAIL] {error_summary}")
-        print(f"[EMAIL] Total subscribers: {len(subscribers)}")
-        print(f"[EMAIL] Successful sends: {success_count}")
-        print(f"[EMAIL] Failed sends: {len(failed_emails)}")
-        print(f"[EMAIL] Failed email addresses (first 10): {failed_emails[:10]}")
-        print(f"[EMAIL] Error details (first 5):")
-        for detail in error_details[:5]:
-            print(f"[EMAIL]   - {detail}")
-        print("="*60)
-        print(f"✗ {error_summary}")
+        root_logger.error(f"[EMAIL] Failed to send to {len(failed_emails)}/{len(subscribers)} subscribers")
+        root_logger.error(f"[EMAIL] Failed emails (first 5): {failed_emails[:5]}")
+        if error_details:
+            root_logger.error(f"[EMAIL] Error details (first 3): {error_details[:3]}")
     elif success_count == 0:
-        logger.error("="*60)
-        logger.error("EMAIL SENDING FAILURE - NO EMAILS SENT")
-        logger.error("="*60)
-        logger.error(f"Total subscribers: {len(subscribers)}")
-        logger.error("All email attempts returned False - check Resend API configuration")
-        logger.error("This usually means:")
-        logger.error("  1. RESEND_API_KEY is invalid or expired")
-        logger.error("  2. Resend API rate limit exceeded")
-        logger.error("  3. All email addresses are invalid")
-        logger.error("  4. Domain not verified in Resend dashboard")
-        logger.error("="*60)
-        # Also log to root logger for visibility
-        root_logger.error("="*60)
-        root_logger.error("[EMAIL] EMAIL SENDING FAILURE - NO EMAILS SENT")
-        root_logger.error("="*60)
-        root_logger.error(f"[EMAIL] Total subscribers: {len(subscribers)}")
-        root_logger.error("[EMAIL] All email attempts returned False - check Resend API configuration")
-        root_logger.error("[EMAIL] This usually means:")
-        root_logger.error("[EMAIL]   1. RESEND_API_KEY is invalid or expired")
-        root_logger.error("[EMAIL]   2. Resend API rate limit exceeded")
-        root_logger.error("[EMAIL]   3. All email addresses are invalid")
-        root_logger.error("[EMAIL]   4. Domain not verified in Resend dashboard")
-        root_logger.error("="*60)
-        # Also print to stdout
-        print("="*60)
-        print("[EMAIL] EMAIL SENDING FAILURE - NO EMAILS SENT")
-        print("="*60)
-        print(f"[EMAIL] Total subscribers: {len(subscribers)}")
-        print("[EMAIL] All email attempts returned False - check Resend API configuration")
-        print("[EMAIL] This usually means:")
-        print("[EMAIL]   1. RESEND_API_KEY is invalid or expired")
-        print("[EMAIL]   2. Resend API rate limit exceeded")
-        print("[EMAIL]   3. All email addresses are invalid")
-        print("[EMAIL]   4. Domain not verified in Resend dashboard")
-        print("="*60)
+        root_logger.error("[EMAIL] No emails sent - all attempts failed")
+        root_logger.error("[EMAIL] Check: RESEND_API_KEY, domain verification, rate limits")
     
     return success_count > 0
 
