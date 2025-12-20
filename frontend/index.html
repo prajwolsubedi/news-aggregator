@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Subscribe to AI News</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Get a curated summary of the most important AI news delivered to your inbox daily."
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <nav>
+      <div class="container">
+        <ul>
+          <li><a href="index.html">Subscribe</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div
+      class="container"
+      style="
+        min-height: calc(100vh - 100px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div class="card">
+        <h1>Subscribe to AI News</h1>
+        <p>
+          Get a curated summary of the most important AI news delivered to your
+          inbox daily.
+        </p>
+
+        <form id="subscribe-form">
+          <input
+            type="email"
+            id="email-input"
+            name="email"
+            placeholder="you@example.com"
+            required
+            autocomplete="email"
+          />
+          <button type="submit" id="submit-button">Subscribe</button>
+        </form>
+
+        <p class="hint">
+          We'll email you when there's something worth reading. Unsubscribe
+          anytime.
+        </p>
+
+        <div id="status-message" style="display: none"></div>
+      </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/subscribe.js"></script>
+  </body>
+</html>

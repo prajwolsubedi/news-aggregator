@@ -4,7 +4,7 @@ from typing import Tuple, Union
 from datetime import datetime, timezone, timedelta, time
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request, Response
+from flask import Flask, jsonify, request, Response
 
 from core import database, models
 from email_templates import get_welcome_email, get_unsubscribe_email, get_welcome_with_news_email
@@ -16,6 +16,14 @@ from run_pipeline import main as run_pipeline_main
 load_dotenv()
 
 app = Flask(__name__)
+
+# Enable CORS for frontend (when hosted separately)
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 # Configure logging
 logging.basicConfig(
@@ -69,80 +77,52 @@ def ensure_db_initialized() -> None:
 
 
 @app.route("/", methods=["GET"])
-def index() -> Response:
-    """Render the subscription form page using the main template."""
-    html = render_template("index.html", mode=None, message=None, message_type=None)
-    return Response(html, mimetype="text/html")
+def index() -> Tuple[Response, int]:
+    """API information endpoint."""
+    return _success_response({
+        "name": "AI News API",
+        "version": "1.0",
+        "endpoints": {
+            "subscribe": "/api/subscribe",
+            "unsubscribe": "/unsubscribe/<token>"
+        }
+    })
 
 
 @app.route("/subscribe", methods=["POST"])
 def subscribe() -> Tuple[Response, int]:
     """Subscribe an email address.
 
-    Accepts either JSON `{ "email": "user@example.com" }`
-    or form-encoded `email` from the HTML form.
+    Accepts JSON `{ "email": "user@example.com" }` or form-encoded `email`.
+    Always returns JSON response.
     """
     email: Union[str, None] = None
 
-    is_json = request.is_json
-
-    if is_json:
+    if request.is_json:
         data = request.get_json(silent=True) or {}
         email = data.get("email")
     else:
         email = request.form.get("email")
 
     if not email:
-        if is_json:
-            return _error_response("Email is required", 400)
-        html = render_template(
-            "index.html",
-            mode=None,
-            message="Email is required.",
-            message_type="error",
-        )
-        return Response(html, mimetype="text/html"), 400
+        return _error_response("Email is required", 400)
 
     email = email.strip()
     if not validate_email(email):
-        if is_json:
-            return _error_response("Invalid email address", 400)
-        html = render_template(
-            "index.html",
-            mode=None,
-            message="Please enter a valid email address.",
-            message_type="error",
-        )
-        return Response(html, mimetype="text/html"), 400
+        return _error_response("Invalid email address", 400)
 
     # Check if already subscribed and active
     existing = models.get_subscriber_by_email(email)
     if existing and existing.is_active:
-        if is_json:
-            return _success_response(
-                {"email": existing.email, "is_active": True, "already_subscribed": True},
-                200,
-            )
-        html = render_template(
-            "index.html",
-            mode=None,
-            message="You're already subscribed to AI News.",
-            message_type="success",
+        return _success_response(
+            {"email": existing.email, "is_active": True, "already_subscribed": True},
+            200,
         )
-        return Response(html, mimetype="text/html"), 200
 
     # Add or reactivate subscriber
     subscriber = models.add_subscriber(email)
     if not subscriber:
-        if is_json:
-            return _error_response("Unable to subscribe at this time", 500)
-        html = render_template(
-            "index.html",
-            mode=None,
-            message="Something went wrong. Please try again later.",
-            message_type="error",
-        )
-        return Response(html, mimetype="text/html"), 500
+        return _error_response("Unable to subscribe at this time", 500)
 
     # Build unsubscribe URL for welcome email
     unsubscribe_url = _build_unsubscribe_url(subscriber.unsubscribe_token)
@@ -168,34 +148,21 @@ def subscribe() -> Tuple[Response, int]:
         "is_active": subscriber.is_active,
     }
 
-    if is_json:
-        return _success_response(response_data, 201)
-
-    html = render_template(
-        "index.html",
-        mode=None,
-        message="You're subscribed! Check your inbox for a welcome email.",
-        message_type="success",
-    )
-    return Response(html, mimetype="text/html"), 201
+    return _success_response(response_data, 201)
 
 
 @app.route("/unsubscribe/<token>", methods=["GET"])
-def unsubscribe(token: str) -> Response:
-    """Unsubscribe using the unique token."""
+def unsubscribe(token: str) -> Tuple[Response, int]:
+    """Unsubscribe using the unique token. Returns JSON response."""
     if not token:
-        return Response("Invalid unsubscribe link.", status=400, mimetype="text/plain")
+        return _error_response("Invalid unsubscribe link", 400)
 
     # Look up subscriber first so we can both validate and email them
     subscriber = models.get_subscriber_by_token(token)
     if not subscriber or not subscriber.is_active:
-        html = render_template(
-            "index.html",
-            mode=None,
-            message="This unsubscribe link is invalid or has already been used.",
-            message_type="error",
+        return _error_response(
+            "This unsubscribe link is invalid or has already been used", 400
         )
-        return Response(html, mimetype="text/html"), 400
 
     # Deactivate subscriber
     models.deactivate_subscriber(token)
@@ -206,13 +173,16 @@ def unsubscribe(token: str) -> Response:
     subject, html_body = get_unsubscribe_email(resubscribe_url)
     send_raw_html_email(subscriber.email, subject, html_body)
 
-    html = render_template(
-        "index.html",
-        mode=None,
-        message="You've been unsubscribed. You can subscribe again anytime.",
-        message_type="success",
-    )
-    return Response(html, mimetype="text/html")
+    return _success_response({
+        "message": "You've been unsubscribed. You can subscribe again anytime.",
+        "email": subscriber.email
+    })
+
+
+@app.route("/api/subscribe", methods=["POST"])
+def api_subscribe() -> Tuple[Response, int]:
+    """API endpoint alias for /subscribe. Always returns JSON."""
+    return subscribe()
 
 
 @app.route("/api/get-videos", methods=["GET"])
