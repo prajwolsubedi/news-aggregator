@@ -69,11 +69,17 @@ def main():
                 print("⚠ PIPELINE COMPLETED WITH WARNINGS")
                 print("="*60)
                 print(f"Error: {error_msg}")
+                logger.error("="*60)
+                logger.error("PIPELINE EMAIL SENDING FAILED")
+                logger.error("="*60)
                 logger.error(error_msg)
-                logger.error("Check send_email logs above for specific email sending failures")
-                # Log full traceback for debugging
-                import traceback
-                logger.debug("Full traceback:", exc_info=True)
+                logger.error("Check send_email module logs above for detailed error messages")
+                logger.error("Common issues:")
+                logger.error("  1. SMTP authentication failed (check SENDER_PASSWORD is Gmail App Password)")
+                logger.error("  2. SMTP server connection timeout")
+                logger.error("  3. No active subscribers in database")
+                logger.error("  4. Invalid email addresses in subscriber list")
+                logger.error("="*60)
                 return False
         except Exception as e:
             error_msg = f"Exception during email sending: {e}"

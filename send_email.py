@@ -536,12 +536,18 @@ def send_email(news_items: list, recipient_email: str, unsubscribe_url: str | No
 
 def send_news_to_all_subscribers(news_items: list) -> bool:
     """Send news email to all active subscribers from the database."""
+    logger.info("="*60)
+    logger.info("EMAIL SENDING - STARTING")
+    logger.info("="*60)
+    
     subscribers = models.get_all_active_subscribers()
+    logger.info(f"Retrieved {len(subscribers) if subscribers else 0} subscribers from database")
 
     if not subscribers:
         error_msg = "✗ No active subscribers found. No emails sent."
         print(error_msg)
-        logger.warning(error_msg)
+        logger.error(error_msg)
+        logger.error("="*60)
         return False
 
     print(f"📧 Sending news to {len(subscribers)} active subscribers...")
@@ -550,13 +556,25 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
     # Check email configuration before starting
     sender_email = os.getenv("SENDER_EMAIL")
     sender_password = os.getenv("SENDER_PASSWORD")
+    
+    logger.info(f"SENDER_EMAIL configured: {'Yes' if sender_email else 'No'}")
+    logger.info(f"SENDER_PASSWORD configured: {'Yes' if sender_password else 'No'}")
+    
     if not sender_email or not sender_password:
         error_msg = "✗ SENDER_EMAIL or SENDER_PASSWORD not set in environment variables"
         print(error_msg)
+        logger.error("="*60)
+        logger.error("EMAIL CONFIGURATION ERROR")
+        logger.error("="*60)
         logger.error(error_msg)
+        logger.error(f"SENDER_EMAIL: {'SET' if sender_email else 'NOT SET'}")
+        logger.error(f"SENDER_PASSWORD: {'SET' if sender_password else 'NOT SET'}")
+        logger.error("="*60)
         return False
     
     logger.info(f"Using sender email: {sender_email}")
+    logger.info(f"SMTP Server: {os.getenv('SMTP_SERVER', 'smtp.gmail.com')}")
+    logger.info(f"SMTP Port: {os.getenv('SMTP_PORT', '587')}")
     
     success_count = 0
     failed_emails = []
@@ -580,14 +598,37 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
 
     result_msg = f"✓ Finished sending emails. Success: {success_count}/{len(subscribers)}"
     print(result_msg)
+    logger.info("="*60)
+    logger.info("EMAIL SENDING - COMPLETED")
+    logger.info("="*60)
     logger.info(result_msg)
     
     if failed_emails:
         error_summary = f"Failed to send emails to {len(failed_emails)}/{len(subscribers)} subscribers"
+        logger.error("="*60)
+        logger.error("EMAIL SENDING FAILURE SUMMARY")
+        logger.error("="*60)
         logger.error(error_summary)
+        logger.error(f"Total subscribers: {len(subscribers)}")
+        logger.error(f"Successful sends: {success_count}")
+        logger.error(f"Failed sends: {len(failed_emails)}")
         logger.error(f"Failed email addresses (first 10): {failed_emails[:10]}")
-        logger.error(f"Error details (first 5): {error_details[:5]}")
+        logger.error(f"Error details (first 5):")
+        for detail in error_details[:5]:
+            logger.error(f"  - {detail}")
+        logger.error("="*60)
         print(f"✗ {error_summary}")
+    elif success_count == 0:
+        logger.error("="*60)
+        logger.error("EMAIL SENDING FAILURE - NO EMAILS SENT")
+        logger.error("="*60)
+        logger.error(f"Total subscribers: {len(subscribers)}")
+        logger.error("All email attempts returned False - check SMTP configuration")
+        logger.error("This usually means:")
+        logger.error("  1. SMTP authentication failed (wrong password/app password)")
+        logger.error("  2. SMTP server connection failed")
+        logger.error("  3. All email addresses are invalid")
+        logger.error("="*60)
     
     return success_count > 0
 
