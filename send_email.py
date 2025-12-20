@@ -2,6 +2,7 @@ import json
 import os
 import re
 import smtplib
+import logging
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -11,6 +12,8 @@ from dotenv import load_dotenv
 from core import models
 from core.utils import load_json_file, get_news_from_json
 from core.database import get_latest_daily_top_news
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -506,12 +509,21 @@ def send_email(news_items: list, recipient_email: str, unsubscribe_url: str | No
         print(f"✓ Email sent successfully to {recipient_email}!")
         return True
         
-    except smtplib.SMTPAuthenticationError:
-        print("✗ Authentication failed. Check your email and password.")
+    except smtplib.SMTPAuthenticationError as e:
+        error_msg = f"✗ Authentication failed. Check your email and password. Error: {e}"
+        print(error_msg)
         print("   For Gmail, you may need to use an App Password instead of your regular password.")
+        logger.error(error_msg, exc_info=True)
+        return False
+    except smtplib.SMTPException as e:
+        error_msg = f"✗ SMTP error sending email: {e}"
+        print(error_msg)
+        logger.error(error_msg, exc_info=True)
         return False
     except Exception as e:
-        print(f"✗ Error sending email: {e}")
+        error_msg = f"✗ Error sending email: {e}"
+        print(error_msg)
+        logger.error(error_msg, exc_info=True)
         return False
 
 
@@ -520,17 +532,36 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
     subscribers = models.get_all_active_subscribers()
 
     if not subscribers:
-        print("✗ No active subscribers found. No emails sent.")
+        error_msg = "✗ No active subscribers found. No emails sent."
+        print(error_msg)
+        logger.warning(error_msg)
         return False
 
     print(f"📧 Sending news to {len(subscribers)} active subscribers...")
+    logger.info(f"Starting to send emails to {len(subscribers)} subscribers")
+    
     success_count = 0
+    failed_emails = []
+    
     for subscriber in subscribers:
         unsubscribe_url = _build_unsubscribe_url(subscriber.unsubscribe_token)
-        if send_email(news_items, subscriber.email, unsubscribe_url=unsubscribe_url):
-            success_count += 1
+        try:
+            if send_email(news_items, subscriber.email, unsubscribe_url=unsubscribe_url):
+                success_count += 1
+            else:
+                failed_emails.append(subscriber.email)
+                logger.warning(f"Failed to send email to {subscriber.email}")
+        except Exception as e:
+            failed_emails.append(subscriber.email)
+            logger.error(f"Exception sending email to {subscriber.email}: {e}", exc_info=True)
 
-    print(f"✓ Finished sending emails. Success: {success_count}/{len(subscribers)}")
+    result_msg = f"✓ Finished sending emails. Success: {success_count}/{len(subscribers)}"
+    print(result_msg)
+    logger.info(result_msg)
+    
+    if failed_emails:
+        logger.warning(f"Failed to send emails to {len(failed_emails)} subscribers: {failed_emails[:5]}")  # Log first 5
+    
     return success_count > 0
 
 if __name__ == "__main__":

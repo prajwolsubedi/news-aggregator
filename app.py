@@ -386,8 +386,8 @@ def run_pipeline() -> Tuple[Response, int]:
             logging.info("Pipeline completed successfully")
             return _success_response({"status": "success", "message": "Pipeline completed"})
         else:
-            logging.error("Pipeline failed")
-            return _error_response("Pipeline failed", 500)
+            logging.error("Pipeline failed - check logs above for details. Likely email sending issue.")
+            return _error_response("Pipeline failed - check server logs for details", 500)
             
     except Exception as e:
         logging.exception("Error in pipeline run")

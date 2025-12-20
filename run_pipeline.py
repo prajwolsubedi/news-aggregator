@@ -7,11 +7,14 @@ generates summaries, and sends the newsletter.
 
 import sys
 import traceback
+import logging
 from datetime import date
 
 from core.database import get_daily_ranked_news
 from process_top_news import build_issue_from_ranked_news, save_top_news
 from send_email import send_news_to_all_subscribers
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -50,17 +53,29 @@ def main():
         
         # Step 4: Send emails to all subscribers
         print("\n[4/4] Sending emails to subscribers...")
-        success = send_news_to_all_subscribers(processed_news)
         
-        if success:
-            print("\n" + "="*60)
-            print("✓ PIPELINE COMPLETED SUCCESSFULLY")
-            print("="*60)
-            return True
-        else:
-            print("\n" + "="*60)
-            print("⚠ PIPELINE COMPLETED WITH WARNINGS")
-            print("="*60)
+        try:
+            success = send_news_to_all_subscribers(processed_news)
+            
+            if success:
+                print("\n" + "="*60)
+                print("✓ PIPELINE COMPLETED SUCCESSFULLY")
+                print("="*60)
+                logger.info("Pipeline completed successfully - emails sent")
+                return True
+            else:
+                error_msg = "Email sending failed - no emails were sent successfully"
+                print("\n" + "="*60)
+                print("⚠ PIPELINE COMPLETED WITH WARNINGS")
+                print("="*60)
+                print(f"Error: {error_msg}")
+                logger.error(error_msg)
+                return False
+        except Exception as e:
+            error_msg = f"Exception during email sending: {e}"
+            print(f"\n✗ Error sending emails: {e}")
+            logger.error(error_msg, exc_info=True)
+            traceback.print_exc()
             return False
             
     except Exception as e:
