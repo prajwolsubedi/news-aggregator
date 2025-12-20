@@ -8,8 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
-dist-ssr
+# dist - Commented out so we can commit built files for GitHub Pages
+# dist-ssr
 *.local
 
 # Editor directories and files
