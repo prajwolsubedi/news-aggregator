@@ -34,10 +34,12 @@ Deploy to Render using the `render.yaml` configuration file. See `RENDER_SETUP_G
 ## Environment Variables
 
 Required environment variables:
+
 - `MONGO_URI` or `DATABASE_URL` - Database connection string
 - `RESEND_API_KEY` - Resend API key for email sending
 - `SENDER_EMAIL` - Email address for sending newsletters
-- `BASE_URL` - Frontend URL (for unsubscribe links)
+- `FRONTEND_URL` - Frontend URL (GitHub Pages) for unsubscribe links (e.g., `https://username.github.io/repo-name`)
+- `BASE_URL` - Backend URL (fallback for unsubscribe links if FRONTEND_URL not set)
 - `CRON_SECRET` - Secret token for internal endpoints
 - `SECRET_KEY` - Flask secret key
 - `GEMINI_API_KEY` - Google Gemini API key for AI ranking
@@ -46,5 +48,6 @@ Required environment variables:
 ## Scheduled Jobs
 
 The backend is triggered by GitHub Actions workflows (in the frontend repository):
+
 - 08:30 NPT - Preprocessing job
 - 09:00 NPT - Main pipeline (newsletter generation and sending)

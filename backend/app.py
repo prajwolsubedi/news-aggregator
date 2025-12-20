@@ -168,8 +168,13 @@ def unsubscribe(token: str) -> Tuple[Response, int]:
     models.deactivate_subscriber(token)
 
     # Build link back to the signup page for the confirmation email
-    base_url = os.getenv("BASE_URL", "").rstrip("/")
-    resubscribe_url = base_url or "/"
+    # Prefer FRONTEND_URL (GitHub Pages), fallback to BASE_URL
+    frontend_url = os.getenv("FRONTEND_URL", "").strip()
+    if frontend_url:
+        resubscribe_url = frontend_url.rstrip("/")
+    else:
+        base_url = os.getenv("BASE_URL", "").rstrip("/")
+        resubscribe_url = base_url or "/"
     subject, html_body = get_unsubscribe_email(resubscribe_url)
     send_raw_html_email(subscriber.email, subject, html_body)
 

@@ -387,14 +387,23 @@ def validate_email(email: str):
 def _build_unsubscribe_url(token: str | None) -> str | None:
     """Build full unsubscribe URL from token.
 
-    Uses BASE_URL environment variable if present, otherwise falls back to a relative URL.
+    Uses FRONTEND_URL environment variable (GitHub Pages) if present,
+    otherwise falls back to BASE_URL, then relative URL.
     """
     if not token:
         return None
 
+    # Prefer FRONTEND_URL for unsubscribe links (points to GitHub Pages frontend)
+    frontend_url = os.getenv("FRONTEND_URL", "").strip()
+    if frontend_url:
+        # Use hash router format for React Router
+        return f"{frontend_url.rstrip('/')}/#/unsubscribe/{token}"
+    
+    # Fallback to BASE_URL if FRONTEND_URL not set
     base_url = os.getenv("BASE_URL", "").strip()
     if base_url:
         return f"{base_url.rstrip('/')}/unsubscribe/{token}"
+    
     # Relative path fallback; still useful in plain-text/preview environments
     return f"/unsubscribe/{token}"
 

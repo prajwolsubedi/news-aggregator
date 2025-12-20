@@ -5,8 +5,9 @@ on:
     branches:
       - main
       - master
+      - decoupling-prod
     paths:
-      - "server/docs/**"
+      - "docs/**"
   workflow_dispatch:
 
 permissions:
@@ -30,16 +31,16 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: server/docs/package.json
+          cache-dependency-path: docs/package.json
 
       - name: Install dependencies
         run: |
-          cd server/docs
+          cd docs
           npm ci
 
       - name: Build
         run: |
-          cd server/docs
+          cd docs
           npm run build
         env:
           VITE_API_BASE_URL: ${{ secrets.RENDER_BASE_URL || 'https://ai-news-web-j6uy.onrender.com' }}
@@ -50,7 +51,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: server/docs/dist
+          path: docs/dist
 
   deploy:
     environment:
