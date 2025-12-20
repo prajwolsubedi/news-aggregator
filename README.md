@@ -45,11 +45,10 @@ An intelligent news aggregator that collects AI-related news from RSS feeds and 
    # Database (for local development, use PostgreSQL connection string)
    DATABASE_URL=postgresql://user:password@localhost:5432/ai_news
 
-   # Email configuration
-   SENDER_EMAIL=your_email@gmail.com
-   SENDER_PASSWORD=your_app_password
-   SMTP_SERVER=smtp.gmail.com
-   SMTP_PORT=587
+   # Email configuration (Resend API)
+   RESEND_API_KEY=your_resend_api_key_here
+   SENDER_EMAIL=ainews@prajwolsubedi.com.np
+   REPLY_TO_EMAIL=prajwolsubedi@gmail.com
 
    # Flask Configuration
    FLASK_ENV=development
@@ -61,7 +60,7 @@ An intelligent news aggregator that collects AI-related news from RSS feeds and 
    SCHEDULER_LOG_LEVEL=INFO
    ```
 
-   **Note for Gmail users**: You'll need to use an [App Password](https://support.google.com/accounts/answer/185833) instead of your regular password.
+   **Note for Email Service**: We use [Resend](https://resend.com) API for sending emails. Sign up at resend.com to get your API key. Make sure your domain (`prajwolsubedi.com.np`) is verified in Resend dashboard.
 
 ## Usage
 
@@ -245,7 +244,7 @@ The system will now:
 - YouTube Data API key (for fetching videos)
 - SerpAPI key (for YouTube transcriptions)
 - PostgreSQL database (provided by Render in production)
-- SMTP email credentials (Gmail App Password recommended)
+- Resend API key (for sending emails) - Sign up at [resend.com](https://resend.com)
 
 ## License
 

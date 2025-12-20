@@ -41,8 +41,9 @@ Set these in your web service:
 GEMINI_API_KEY=your_gemini_api_key
 YOUTUBE_API_KEY=your_youtube_api_key
 SERP_API_KEY=your_serp_api_key
-SENDER_EMAIL=your_email@gmail.com
-SENDER_PASSWORD=your_gmail_app_password
+RESEND_API_KEY=your_resend_api_key
+SENDER_EMAIL=ainews@prajwolsubedi.com.np
+REPLY_TO_EMAIL=prajwolsubedi@gmail.com
 BASE_URL=https://ai-news-web.onrender.com
 CRON_SECRET=your_random_secret_token_here
 ```
@@ -52,8 +53,6 @@ Auto-set by Render:
 - `DATABASE_URL` - From PostgreSQL database
 - `SECRET_KEY` - Auto-generated
 - `FLASK_ENV` - Set to `production`
-- `SMTP_SERVER` - Set to `smtp.gmail.com`
-- `SMTP_PORT` - Set to `587`
 
 ### GitHub Secrets
 

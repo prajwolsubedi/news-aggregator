@@ -13,11 +13,10 @@ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 # Database
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Email Configuration
-SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SENDER_EMAIL = os.getenv("SENDER_EMAIL")
-SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
+# Email Configuration (Resend API)
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "ainews@prajwolsubedi.com.np")
+REPLY_TO_EMAIL = os.getenv("REPLY_TO_EMAIL", "prajwolsubedi@gmail.com")
 
 # Flask Configuration
 FLASK_ENV = os.getenv("FLASK_ENV", "development")
