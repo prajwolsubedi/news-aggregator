@@ -510,18 +510,25 @@ def send_email(news_items: list, recipient_email: str, unsubscribe_url: str | No
         return True
         
     except smtplib.SMTPAuthenticationError as e:
-        error_msg = f"✗ Authentication failed. Check your email and password. Error: {e}"
+        error_msg = f"✗ SMTP Authentication failed for {recipient_email}. Error: {e}"
         print(error_msg)
         print("   For Gmail, you may need to use an App Password instead of your regular password.")
         logger.error(error_msg, exc_info=True)
+        logger.error(f"SMTP Server: {smtp_server}, Port: {smtp_port}, Sender: {sender_email}")
         return False
     except smtplib.SMTPException as e:
-        error_msg = f"✗ SMTP error sending email: {e}"
+        error_msg = f"✗ SMTP error sending email to {recipient_email}: {e}"
+        print(error_msg)
+        logger.error(error_msg, exc_info=True)
+        logger.error(f"SMTP Server: {smtp_server}, Port: {smtp_port}")
+        return False
+    except smtplib.SMTPServerDisconnected as e:
+        error_msg = f"✗ SMTP server disconnected while sending to {recipient_email}: {e}"
         print(error_msg)
         logger.error(error_msg, exc_info=True)
         return False
     except Exception as e:
-        error_msg = f"✗ Error sending email: {e}"
+        error_msg = f"✗ Unexpected error sending email to {recipient_email}: {type(e).__name__}: {e}"
         print(error_msg)
         logger.error(error_msg, exc_info=True)
         return False
@@ -540,27 +547,47 @@ def send_news_to_all_subscribers(news_items: list) -> bool:
     print(f"📧 Sending news to {len(subscribers)} active subscribers...")
     logger.info(f"Starting to send emails to {len(subscribers)} subscribers")
     
+    # Check email configuration before starting
+    sender_email = os.getenv("SENDER_EMAIL")
+    sender_password = os.getenv("SENDER_PASSWORD")
+    if not sender_email or not sender_password:
+        error_msg = "✗ SENDER_EMAIL or SENDER_PASSWORD not set in environment variables"
+        print(error_msg)
+        logger.error(error_msg)
+        return False
+    
+    logger.info(f"Using sender email: {sender_email}")
+    
     success_count = 0
     failed_emails = []
+    error_details = []
     
-    for subscriber in subscribers:
+    for idx, subscriber in enumerate(subscribers, 1):
         unsubscribe_url = _build_unsubscribe_url(subscriber.unsubscribe_token)
         try:
+            logger.info(f"[{idx}/{len(subscribers)}] Attempting to send email to {subscriber.email}")
             if send_email(news_items, subscriber.email, unsubscribe_url=unsubscribe_url):
                 success_count += 1
+                logger.info(f"[{idx}/{len(subscribers)}] Successfully sent email to {subscriber.email}")
             else:
                 failed_emails.append(subscriber.email)
-                logger.warning(f"Failed to send email to {subscriber.email}")
+                error_details.append(f"{subscriber.email}: send_email returned False")
+                logger.warning(f"[{idx}/{len(subscribers)}] Failed to send email to {subscriber.email} - send_email returned False")
         except Exception as e:
             failed_emails.append(subscriber.email)
-            logger.error(f"Exception sending email to {subscriber.email}: {e}", exc_info=True)
+            error_details.append(f"{subscriber.email}: {str(e)}")
+            logger.error(f"[{idx}/{len(subscribers)}] Exception sending email to {subscriber.email}: {e}", exc_info=True)
 
     result_msg = f"✓ Finished sending emails. Success: {success_count}/{len(subscribers)}"
     print(result_msg)
     logger.info(result_msg)
     
     if failed_emails:
-        logger.warning(f"Failed to send emails to {len(failed_emails)} subscribers: {failed_emails[:5]}")  # Log first 5
+        error_summary = f"Failed to send emails to {len(failed_emails)}/{len(subscribers)} subscribers"
+        logger.error(error_summary)
+        logger.error(f"Failed email addresses (first 10): {failed_emails[:10]}")
+        logger.error(f"Error details (first 5): {error_details[:5]}")
+        print(f"✗ {error_summary}")
     
     return success_count > 0
 

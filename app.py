@@ -386,11 +386,22 @@ def run_pipeline() -> Tuple[Response, int]:
             logging.info("Pipeline completed successfully")
             return _success_response({"status": "success", "message": "Pipeline completed"})
         else:
-            logging.error("Pipeline failed - check logs above for details. Likely email sending issue.")
+            logging.error("="*60)
+            logging.error("Pipeline failed - check logs above for details")
+            logging.error("Common causes:")
+            logging.error("  1. Email sending failed (check SENDER_EMAIL and SENDER_PASSWORD)")
+            logging.error("  2. SMTP authentication error (Gmail requires App Password)")
+            logging.error("  3. SMTP connection timeout or server error")
+            logging.error("  4. No active subscribers found")
+            logging.error("="*60)
             return _error_response("Pipeline failed - check server logs for details", 500)
             
     except Exception as e:
-        logging.exception("Error in pipeline run")
+        logging.exception("="*60)
+        logging.exception("Exception in pipeline run endpoint")
+        logging.exception(f"Error type: {type(e).__name__}")
+        logging.exception(f"Error message: {str(e)}")
+        logging.exception("="*60)
         return _error_response(f"Error: {str(e)}", 500)
 
 

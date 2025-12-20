@@ -70,6 +70,10 @@ def main():
                 print("="*60)
                 print(f"Error: {error_msg}")
                 logger.error(error_msg)
+                logger.error("Check send_email logs above for specific email sending failures")
+                # Log full traceback for debugging
+                import traceback
+                logger.debug("Full traceback:", exc_info=True)
                 return False
         except Exception as e:
             error_msg = f"Exception during email sending: {e}"
