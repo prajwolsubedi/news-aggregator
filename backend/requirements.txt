@@ -27,4 +27,7 @@ requests>=2.28.0
 # Email Service (Resend API)
 resend>=2.0.0
 
+# WSGI Server (for production deployment)
+gunicorn>=21.2.0
+
 # Note: Scheduling is handled by GitHub Actions, not APScheduler
