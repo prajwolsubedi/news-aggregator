@@ -10,9 +10,52 @@ const NewsletterForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+
+    // Enhanced email validation
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
       setStatus("error");
       setMessage("Please enter a valid email address.");
+      return;
+    }
+
+    // Length check (RFC 5321: max 320 chars)
+    if (trimmedEmail.length > 320) {
+      setStatus("error");
+      setMessage("Email address is too long. Maximum 320 characters.");
+      return;
+    }
+
+    // Prevent email header injection
+    if (/[\n\r\0]/.test(trimmedEmail)) {
+      setStatus("error");
+      setMessage("Invalid email address format.");
+      return;
+    }
+
+    // Enhanced regex validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setStatus("error");
+      setMessage("Please enter a valid email address.");
+      return;
+    }
+
+    // Additional security checks
+    if (
+      trimmedEmail.includes("..") ||
+      trimmedEmail.startsWith(".") ||
+      trimmedEmail.endsWith(".")
+    ) {
+      setStatus("error");
+      setMessage("Invalid email address format.");
+      return;
+    }
+
+    if (trimmedEmail.split("@").length !== 2) {
+      setStatus("error");
+      setMessage("Invalid email address format.");
       return;
     }
 
@@ -20,7 +63,7 @@ const NewsletterForm: React.FC = () => {
     setMessage("");
 
     try {
-      const result = await subscribe(email.trim());
+      const result = await subscribe(trimmedEmail);
 
       if (result.ok) {
         if (result.already_subscribed) {

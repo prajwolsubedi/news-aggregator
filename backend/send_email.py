@@ -380,9 +380,38 @@ def create_html_email(news_items: list, unsubscribe_url: str | None = None):
     return html_content
 
 def validate_email(email: str):
-    """Validate email address format."""
+    """Validate email address format with security checks.
+    
+    Prevents:
+    - Email header injection (newlines, carriage returns)
+    - Extremely long emails
+    - Invalid characters
+    """
+    if not email or not isinstance(email, str):
+        return False
+    
+    # Length check (RFC 5321: max 320 chars for email address)
+    if len(email) > 320:
+        return False
+    
+    # Prevent email header injection attacks
+    if '\n' in email or '\r' in email or '\0' in email:
+        return False
+    
+    # Basic format validation (more strict than before)
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
+    if not re.match(pattern, email):
+        return False
+    
+    # Additional checks: no consecutive dots, no leading/trailing dots
+    if '..' in email or email.startswith('.') or email.endswith('.'):
+        return False
+    
+    # Ensure @ appears only once
+    if email.count('@') != 1:
+        return False
+    
+    return True
 
 def _build_unsubscribe_url(token: str | None) -> str | None:
     """Build full unsubscribe URL from token.
