@@ -8,15 +8,12 @@ const About: React.FC = () => {
       </h1>
 
       <section className="mb-20 space-y-8">
-        <div className="aspect-video bg-[#f0f0f0] border-2 border-black flex items-center justify-center overflow-hidden shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
-          <div className="text-center p-8">
-            <p className="text-sm uppercase tracking-widest text-black/40 font-black mb-2">
-              System Architecture Screenshot
-            </p>
-            <p className="text-xs text-black/30">
-              Add a screenshot of the system architecture or pipeline here
-            </p>
-          </div>
+        <div className="aspect-video border-2 border-black overflow-hidden shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
+          <img
+            src="/architecture.png"
+            alt="System Architecture Diagram showing Frontend, Backend API, Database, GitHub Actions, and Local GPU Worker components"
+            className="w-full h-full object-contain"
+          />
         </div>
         <p className="text-xl leading-relaxed text-black/70 italic border-l-4 border-[#ff4d4d] pl-6 font-medium">
           "The most powerful ideas are often the simplest ones. We built Neural
@@ -157,16 +154,20 @@ const About: React.FC = () => {
                     <li>Temporary files are cleaned up automatically</li>
                   </ol>
                 </div>
-                <div className="mt-4 aspect-video bg-[#f0f0f0] border-2 border-black flex items-center justify-center overflow-hidden shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
-                  <div className="text-center p-6">
-                    <p className="text-xs uppercase tracking-widest text-black/40 font-black mb-2">
-                      Transcription Worker Screenshot
-                    </p>
-                    <p className="text-[10px] text-black/30">
-                      Add screenshot of worker processing videos or
-                      transcription output here
-                    </p>
-                  </div>
+                <div
+                  className="mt-4 w-full max-w-lg mx-auto border-2 border-black overflow-hidden shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] bg-black"
+                  style={{ aspectRatio: "2/3", minHeight: "700px" }}
+                >
+                  <img
+                    src="/worker.png"
+                    alt="Transcription Worker processing videos - showing Whisper model loading, audio downloading, and transcription progress"
+                    className="w-full h-full object-contain"
+                    style={{
+                      transform: "scale(1.7)",
+                      transformOrigin: "left center",
+                      objectPosition: "left center",
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -193,16 +194,12 @@ const About: React.FC = () => {
                 newsletter, ensuring you receive only the highest-quality,
                 most-relevant content.
               </p>
-              <div className="mt-4 aspect-video bg-[#f0f0f0] border-2 border-black flex items-center justify-center overflow-hidden shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
-                <div className="text-center p-6">
-                  <p className="text-xs uppercase tracking-widest text-black/40 font-black mb-2">
-                    Ranking Process Screenshot
-                  </p>
-                  <p className="text-[10px] text-black/30">
-                    Add screenshot of AI ranking output or news selection
-                    process here
-                  </p>
-                </div>
+              <div className="mt-4 aspect-video border-2 border-black overflow-hidden shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
+                <img
+                  src="/rank1.jpeg"
+                  alt="AI ranking output showing ranked news items with scores, sources, and titles from the daily_ranked_news table"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>
@@ -224,15 +221,15 @@ const About: React.FC = () => {
                 <li>Direct links to original sources</li>
                 <li>Mobile-friendly HTML email design</li>
               </ul>
-              <div className="mt-4 aspect-video bg-[#f0f0f0] border-2 border-black flex items-center justify-center overflow-hidden shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]">
-                <div className="text-center p-6">
-                  <p className="text-xs uppercase tracking-widest text-black/40 font-black mb-2">
-                    Newsletter Email Screenshot
-                  </p>
-                  <p className="text-[10px] text-black/30">
-                    Add screenshot of the final newsletter email here
-                  </p>
-                </div>
+              <div
+                className="mt-4 w-full max-w-md mx-auto border-2 border-black overflow-hidden shadow-[8px_8px_0px_0px_rgba(26,26,26,1)]"
+                style={{ aspectRatio: "723/1175" }}
+              >
+                <img
+                  src="/newsletter.png"
+                  alt="Final newsletter email showing Top AI News with articles about Gemini 3 Flash, formatted with thumbnails, summaries, and links"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
           </div>
@@ -258,16 +255,12 @@ const About: React.FC = () => {
           System Architecture
         </h2>
         <div className="space-y-6">
-          <div className="aspect-video bg-[#f0f0f0] border-2 border-black flex items-center justify-center overflow-hidden shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
-            <div className="text-center p-8">
-              <p className="text-sm uppercase tracking-widest text-black/40 font-black mb-2">
-                Pipeline Flow Diagram
-              </p>
-              <p className="text-xs text-black/30">
-                Add a diagram showing: RSS/YouTube → Ranking → Transcription →
-                Newsletter → Email
-              </p>
-            </div>
+          <div className="aspect-video border-2 border-black overflow-hidden shadow-[12px_12px_0px_0px_rgba(26,26,26,1)]">
+            <img
+              src="/pipeline-flow.jpg"
+              alt="AI Newsletter System Pipeline Flow diagram showing the complete workflow from RSS/YouTube fetching, ranking with Gemini AI, transcription with Whisper, to newsletter generation and email delivery"
+              className="w-full h-full object-contain"
+            />
           </div>
           <p className="text-black/60 leading-relaxed">
             The system consists of three main components: a backend server

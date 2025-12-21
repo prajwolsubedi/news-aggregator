@@ -41,14 +41,21 @@ const Footer: React.FC = () => (
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-xs uppercase tracking-widest text-black/40 font-bold">
       <p>© 2024 NEURAL NOTES INC.</p>
       <div className="flex space-x-6 mt-4 md:mt-0">
-        <a href="#" className="hover:text-black">
-          Twitter
+        <a
+          href="https://github.com/prajwolsubedi"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-black"
+        >
+          GitHub
         </a>
-        <a href="#" className="hover:text-black">
-          Substack
-        </a>
-        <a href="#" className="hover:text-black">
-          Privacy
+        <a
+          href="https://x.com/PrajwolSubedi13"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-black"
+        >
+          Twitter/X
         </a>
       </div>
     </div>

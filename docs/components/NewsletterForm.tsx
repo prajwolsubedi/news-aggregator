@@ -55,7 +55,7 @@ const NewsletterForm: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="ENTER YOUR EMAIL"
             disabled={status === "loading" || status === "success"}
-            className="flex-grow px-6 py-4 outline-none uppercase text-sm font-bold tracking-widest placeholder:text-black/20"
+            className="flex-grow px-6 py-4 outline-none lowercase text-sm font-bold tracking-widest placeholder:text-black/20"
           />
           <button
             type="submit"
