@@ -1,4 +1,4 @@
-name: Trigger Newsletter Pipeline on Render
+name: Trigger Newsletter Pipeline on Azure
 
 on:
   schedule:
@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Call /internal/run-pipeline on Render
+      - name: Call /internal/run-pipeline on Azure
         run: |
           curl -X POST \
             -H "X-Cron-Token: $CRON_SECRET" \
-            "$RENDER_BASE_URL/internal/run-pipeline"
+            "$AZURE_BASE_URL/internal/run-pipeline"
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          RENDER_BASE_URL: ${{ secrets.RENDER_BASE_URL }}
+          AZURE_BASE_URL: ${{ secrets.AZURE_BASE_URL }}

@@ -43,7 +43,7 @@ jobs:
           cd docs
           npm run build
         env:
-          VITE_API_BASE_URL: ${{ secrets.RENDER_BASE_URL || 'https://ai-news-web-j6uy.onrender.com' }}
+          VITE_API_BASE_URL: ${{ secrets.AZURE_BASE_URL }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

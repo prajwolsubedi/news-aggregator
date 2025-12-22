@@ -264,9 +264,9 @@ const About: React.FC = () => {
           </div>
           <p className="text-black/60 leading-relaxed">
             The system consists of three main components: a backend server
-            (hosted on Render) that orchestrates the pipeline, a local GPU
-            worker that handles video transcription, and automated scheduled
-            jobs that trigger the process daily.
+            (hosted on Azure App Service) that orchestrates the pipeline, a
+            local GPU worker that handles video transcription, and automated
+            scheduled jobs that trigger the process daily.
           </p>
         </div>
       </section>

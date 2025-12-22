@@ -1,7 +1,8 @@
 // API service for making requests to the backend
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://ai-news-web-j6uy.onrender.com";
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://ai-newsletter-a0dcfrdjfxasfydt.centralindia-01.azurewebsites.net";
 
 export interface SubscribeResponse {
   ok: boolean;
