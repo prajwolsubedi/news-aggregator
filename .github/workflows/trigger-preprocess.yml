@@ -2,21 +2,58 @@ name: Trigger Preprocess on Azure
 
 on:
   schedule:
-    # 02:45 UTC == 08:30 NPT
+    # 03:35 UTC == 09:20 NPT
     # Nepal Standard Time is UTC+5:45
-    - cron: "45 2 * * *"
+    - cron: "35 3 * * *"
   workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: read
 
 jobs:
   call-preprocess-endpoint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Call /internal/run-preprocess on Azure
         run: |
-          curl -X POST \
-            -H "X-Cron-Token: $CRON_SECRET" \
-            "$AZURE_BASE_URL/internal/run-preprocess"
+          MAX_RETRIES=3
+          RETRY_DELAY=30
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i of $MAX_RETRIES"
+            
+            HTTP_CODE=$(curl -s -o /tmp/response.txt -w "%{http_code}" \
+              --max-time 300 \
+              -X POST \
+              -H "X-Cron-Token: $CRON_SECRET" \
+              "$AZURE_BASE_URL/internal/run-preprocess")
+            
+            echo "HTTP Status Code: $HTTP_CODE"
+            cat /tmp/response.txt
+            
+            if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+              echo "✅ Success! Preprocess triggered successfully."
+              exit 0
+            elif [ "$HTTP_CODE" -eq 401 ]; then
+              echo "❌ Authentication failed. Check CRON_SECRET."
+              exit 1
+            elif [ "$HTTP_CODE" -eq 000 ]; then
+              echo "⚠️ Connection failed. Retrying in $RETRY_DELAY seconds..."
+              if [ $i -lt $MAX_RETRIES ]; then
+                sleep $RETRY_DELAY
+              fi
+            else
+              echo "⚠️ HTTP $HTTP_CODE received. Retrying in $RETRY_DELAY seconds..."
+              if [ $i -lt $MAX_RETRIES ]; then
+                sleep $RETRY_DELAY
+              fi
+            fi
+          done
+
+          echo "❌ Failed after $MAX_RETRIES attempts"
+          exit 1
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           AZURE_BASE_URL: ${{ secrets.AZURE_BASE_URL }}
