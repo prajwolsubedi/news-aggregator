@@ -38,271 +38,160 @@ def get_youtube_thumbnail(video_id: str):
     return f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
 
 def create_html_email(news_items: list, unsubscribe_url: str | None = None):
-    """Create styled HTML email with animations and optional unsubscribe link."""
+    """Create professional minimalist HTML email with responsive design."""
     
     current_date = datetime.now().strftime("%B %d, %Y")
     
     html_content = """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Top AI News - """ + current_date + """</title>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-            
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>AI News Digest - """ + current_date + """</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style type="text/css">
+        /* Reset styles */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+        
+        /* Base styles */
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #f4f4f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        /* Link styles */
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive styles */
+        @media screen and (max-width: 600px) {
+            .mobile-full-width {
+                width: 100% !important;
+                max-width: 100% !important;
             }
-            
-            body {
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 20px;
-                line-height: 1.6;
+            .mobile-padding {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
             }
-            
-            .email-container {
-                max-width: 700px;
-                margin: 0 auto;
-                background: #ffffff;
-                border-radius: 20px;
-                overflow: hidden;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            .mobile-stack {
+                display: block !important;
+                width: 100% !important;
             }
-            
-            .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 40px 30px;
-                text-align: center;
+            .mobile-center {
+                text-align: center !important;
             }
-            
-            .header h1 {
-                font-size: 32px;
-                font-weight: 700;
-                margin-bottom: 10px;
-                animation: fadeInDown 0.6s ease-out;
+            .mobile-hide {
+                display: none !important;
             }
-            
-            .header p {
-                font-size: 16px;
-                opacity: 0.9;
-                animation: fadeInUp 0.6s ease-out 0.2s both;
+            .video-thumbnail {
+                width: 100% !important;
+                height: auto !important;
+                max-width: 100% !important;
             }
-            
-            .content {
-                padding: 40px 30px;
+            .content-cell {
+                padding: 24px 20px !important;
             }
-            
-            .news-item {
-                background: #f8f9fa;
-                border-radius: 15px;
-                padding: 25px;
-                margin-bottom: 25px;
-                border-left: 4px solid #667eea;
-                transition: all 0.3s ease;
-                animation: slideInLeft 0.5s ease-out;
-                animation-fill-mode: both;
+            .news-card {
+                margin-bottom: 16px !important;
             }
-            
-            .news-item:nth-child(1) { animation-delay: 0.1s; }
-            .news-item:nth-child(2) { animation-delay: 0.2s; }
-            .news-item:nth-child(3) { animation-delay: 0.3s; }
-            .news-item:nth-child(4) { animation-delay: 0.4s; }
-            .news-item:nth-child(5) { animation-delay: 0.5s; }
-            .news-item:nth-child(6) { animation-delay: 0.6s; }
-            .news-item:nth-child(7) { animation-delay: 0.7s; }
-            .news-item:nth-child(8) { animation-delay: 0.8s; }
-            .news-item:nth-child(9) { animation-delay: 0.9s; }
-            .news-item:nth-child(10) { animation-delay: 1.0s; }
-            .news-item:nth-child(11) { animation-delay: 1.1s; }
-            
-            .news-item:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-                border-left-color: #764ba2;
+            .header-title {
+                font-size: 24px !important;
             }
-            
-            .news-header {
-                display: flex;
-                align-items: flex-start;
-                gap: 20px;
-                margin-bottom: 15px;
-            }
-            
-            .thumbnail {
-                width: 300px;
-                height: 150px;
-                border-radius: 10px;
-                object-fit: cover;
-                flex-shrink: 0;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                transition: transform 0.3s ease;
-                padding-right: 10px;
-            }
-            
-            .thumbnail:hover {
-                transform: scale(1.05);
-            }
-            
-            .news-info {
-                flex: 1;
-            }
-            
-            .source-badge {
-                display: inline-block;
-                padding: 5px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 600;
-                text-transform: uppercase;
-                margin-bottom: 10px;
-                animation: pulse 2s infinite;
-            }
-            
-            .source-website {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-            }
-            
-            .source-youtube {
-                background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
-                color: white;
-            }
-            
-            .news-title {
-                font-size: 20px;
-                font-weight: 600;
-                color: #2d3748;
-                margin-bottom: 12px;
-                line-height: 1.4;
-            }
-            
-            .news-link {
-                display: inline-block;
-                color: #667eea;
-                text-decoration: none;
-                font-weight: 600;
-                font-size: 14px;
-                transition: all 0.3s ease;
-                position: relative;
-            }
-            
-            .news-link::after {
-                content: '→';
-                margin-left: 5px;
-                transition: transform 0.3s ease;
-                display: inline-block;
-            }
-            
-            .news-link:hover::after {
-                transform: translateX(5px);
-            }
-            
-            .news-link:hover {
-                color: #764ba2;
-            }
-            
-            .news-summary {
-                color: #4a5568;
-                font-size: 15px;
-                line-height: 1.7;
-                margin-top: 15px;
-                padding-top: 15px;
-                border-top: 1px solid #e2e8f0;
-            }
-            
-            .news-meta {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: 15px;
-                font-size: 13px;
-                color: #718096;
-            }
-            
-            .footer {
-                background: #f8f9fa;
-                padding: 30px;
-                text-align: center;
-                color: #718096;
-                font-size: 14px;
-            }
-            
-            @keyframes fadeInDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            @keyframes fadeInUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            @keyframes slideInLeft {
-                from {
-                    opacity: 0;
-                    transform: translateX(-30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-            }
-            
-            @keyframes pulse {
-                0%, 100% {
-                    opacity: 1;
-                }
-                50% {
-                    opacity: 0.8;
-                }
-            }
-            
-            @media (max-width: 600px) {
-                .news-header {
-                    flex-direction: column;
-                }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5;">
+    <!-- Preview text -->
+    <div style="display: none; max-height: 0; overflow: hidden;">
+        Your daily AI news digest is here - Top stories curated for you
+        &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+    </div>
+    
+    <!-- Email wrapper -->
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f4f4f5;">
+        <tr>
+            <td align="center" style="padding: 40px 16px;">
                 
-                .thumbnail {
-                    width: 100%;
-                    height: 200px;
-                }
-                
-                .header h1 {
-                    font-size: 24px;
-                }
-                
-                .content {
-                    padding: 20px;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="email-container">
-            <div class="header">
-                <h1> Top AI News</h1>
-                <p>""" + current_date + """</p>
-            </div>
-            
-            <div class="content">
+                <!-- Main container -->
+                <table role="presentation" class="mobile-full-width" width="600" cellspacing="0" cellpadding="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); padding: 52px 40px; text-align: center;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <!-- Logo -->
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 24px;">
+                                            <tr>
+                                                <td style="padding-right: 12px;" valign="middle">
+                                                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); border-radius: 10px; text-align: center;">
+                                                        <span style="font-size: 22px; line-height: 44px; display: block;">✦</span>
+                                                    </div>
+                                                </td>
+                                                <td valign="middle">
+                                                    <span style="font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">AI News</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- Tagline -->
+                                        <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">
+                                            Daily Digest
+                                        </p>
+                                        <p style="margin: 0; font-size: 15px; color: #64748b; font-weight: 400;">
+                                            """ + current_date + """
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Intro section -->
+                    <tr>
+                        <td class="content-cell" style="padding: 32px 40px 24px 40px;">
+                            <p style="margin: 0; font-size: 16px; color: #52525b; line-height: 1.6;">
+                                Here are today's top AI stories, carefully curated to keep you informed about the latest developments in artificial intelligence.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- News items container -->
+                    <tr>
+                        <td class="content-cell" style="padding: 0 40px 32px 40px;">
     """
     
     # Add news items
@@ -317,63 +206,163 @@ def create_html_email(news_items: list, unsubscribe_url: str | None = None):
         try:
             if published_at:
                 pub_date = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
-                formatted_date = pub_date.strftime("%B %d, %Y at %I:%M %p")
+                formatted_date = pub_date.strftime("%b %d, %Y")
             else:
-                formatted_date = "Date not available"
+                formatted_date = ""
         except:
-            formatted_date = published_at if published_at else "Date not available"
+            formatted_date = ""
         
-        # Get thumbnail for YouTube videos
-        thumbnail_html = ""
-        if source == "youtube":
+        # Determine source styling
+        is_youtube = source == "youtube"
+        source_bg = "#dc2626" if is_youtube else "#2563eb"
+        source_label = "VIDEO" if is_youtube else "ARTICLE"
+        source_icon = "▶" if is_youtube else "◉"
+        
+        # Build YouTube thumbnail section
+        thumbnail_section = ""
+        if is_youtube:
             video_id = source_link.split("v=")[-1].split("&")[0] if "v=" in source_link else ""
             if video_id:
                 thumbnail_url = get_youtube_thumbnail(video_id)
-                thumbnail_html = f'<img src="{thumbnail_url}" alt="Video thumbnail" class="thumbnail">'
+                thumbnail_section = f"""
+                            <!-- YouTube Thumbnail -->
+                            <tr>
+                                <td style="padding-bottom: 16px;">
+                                    <a href="{source_link}" target="_blank" style="display: block; text-decoration: none;">
+                                        <div style="position: relative; border-radius: 8px; overflow: hidden;">
+                                            <img src="{thumbnail_url}" alt="Video thumbnail" class="video-thumbnail" width="520" style="width: 100%; height: auto; display: block; border-radius: 8px;">
+                                            <!-- Play button overlay -->
+                                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px; background-color: rgba(0, 0, 0, 0.7); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                <span style="color: #ffffff; font-size: 24px; margin-left: 4px;">▶</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </td>
+                            </tr>
+                """
         
-        source_class = "source-website" if source == "website" else "source-youtube"
-        source_label = "📰 Website" if source == "website" else "📺 YouTube"
-        
+        # Build the news card
         html_content += f"""
-                <div class="news-item">
-                    <div class="news-header">
-                        {thumbnail_html if thumbnail_html else ''}
-                        <div class="news-info">
-                            <span class="source-badge {source_class}">{source_label}</span>
-                            <h2 class="news-title">{title}</h2>
-                            <a href="{source_link}" target="_blank" class="news-link">Read Full Article</a>
-                        </div>
-                    </div>
-                    <div class="news-summary">
-                        {summary}
-                    </div>
-                    <div class="news-meta">
-                        <span>#{idx}</span>
-                        <span>{formatted_date}</span>
-                    </div>
-                </div>
+                            <!-- News Item {idx} -->
+                            <table role="presentation" class="news-card" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 24px; background-color: #fafafa; border-radius: 12px; overflow: hidden;">
+                                <tr>
+                                    <td style="padding: 24px;">
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                            <!-- Header row with number and source badge -->
+                                            <tr>
+                                                <td style="padding-bottom: 14px;">
+                                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                        <tr>
+                                                            <td width="36" valign="middle">
+                                                                <span style="display: inline-block; font-size: 15px; font-weight: 700; color: #3b82f6; letter-spacing: -0.5px;">#{idx}</span>
+                                                            </td>
+                                                            <td align="right" valign="middle">
+                                                                <span style="display: inline-block; padding: 5px 12px; background-color: {source_bg}; color: #ffffff; font-size: 10px; font-weight: 600; letter-spacing: 0.8px; border-radius: 20px; text-transform: uppercase;">
+                                                                    {source_icon} {source_label}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            
+                                            {thumbnail_section}
+                                            
+                                            <!-- Title -->
+                                            <tr>
+                                                <td style="padding-bottom: 12px;">
+                                                    <a href="{source_link}" target="_blank" style="text-decoration: none;">
+                                                        <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #18181b; line-height: 1.4;">
+                                                            {title}
+                                                        </h2>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Summary -->
+                                            <tr>
+                                                <td style="padding-bottom: 16px;">
+                                                    <p style="margin: 0; font-size: 15px; color: #52525b; line-height: 1.65;">
+                                                        {summary}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Footer with link and date -->
+                                            <tr>
+                                                <td>
+                                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                        <tr>
+                                                            <td>
+                                                                <a href="{source_link}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #18181b; color: #ffffff; font-size: 13px; font-weight: 500; text-decoration: none; border-radius: 6px;">
+                                                                    {"Watch Video" if is_youtube else "Read More"} →
+                                                                </a>
+                                                            </td>
+                                                            <td align="right" style="font-size: 13px; color: #a1a1aa;">
+                                                                {formatted_date}
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
         """
     
     html_content += """
-            </div>
-            
-            <div class="footer">
-                <p>Generated by AI News Aggregator</p>
-                <p style="margin-top: 10px; font-size: 12px;">Stay updated with the latest AI news and developments</p>
-                <!--UNSUBSCRIBE_PLACEHOLDER-->
-            </div>
-        </div>
-    </body>
-    </html>
+                        </td>
+                    </tr>
+                    
+                    <!-- Divider -->
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <div style="height: 1px; background-color: #e4e4e7;"></div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 32px 40px; text-align: center;">
+                            <p style="margin: 0 0 8px 0; font-size: 14px; color: #71717a;">
+                                Curated with ❤️ by <strong style="color: #18181b;">AI News Digest</strong>
+                            </p>
+                            <p style="margin: 0; font-size: 13px; color: #a1a1aa;">
+                                Keeping you informed about the future of AI
+                            </p>
+                            <!--UNSUBSCRIBE_PLACEHOLDER-->
+                        </td>
+                    </tr>
+                    
+                </table>
+                <!-- End main container -->
+                
+                <!-- Bottom branding -->
+                <table role="presentation" width="600" class="mobile-full-width" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="padding: 24px 40px; text-align: center;">
+                            <p style="margin: 0; font-size: 12px; color: #a1a1aa;">
+                                © """ + str(datetime.now().year) + """ AI News Digest. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
     """
+    
     # Insert unsubscribe footer if URL provided
     unsubscribe_html = ""
     if unsubscribe_url:
         unsubscribe_html = (
-            '<p style="margin-top: 15px; font-size: 12px;">'
-            'If you no longer want to receive these emails, you can '
-            f'<a href="{unsubscribe_url}">unsubscribe here</a>.'
-            "</p>"
+            '<p style="margin: 16px 0 0 0; font-size: 13px; color: #a1a1aa;">'
+            '<a href="' + unsubscribe_url + '" style="color: #71717a; text-decoration: underline;">Unsubscribe</a> from these emails'
+            '</p>'
         )
     html_content = html_content.replace("<!--UNSUBSCRIBE_PLACEHOLDER-->", unsubscribe_html)
 
