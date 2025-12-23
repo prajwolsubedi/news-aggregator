@@ -7,10 +7,9 @@ def _unsubscribe_footer(unsubscribe_url: Optional[str]) -> str:
     if not unsubscribe_url:
         return ""
     return (
-        '<p style="margin-top: 15px; font-size: 12px;">'
-        'If you no longer want to receive these emails, you can '
-        f'<a href="{unsubscribe_url}">unsubscribe here</a>.'
-        "</p>"
+        '<p style="margin: 16px 0 0 0; font-size: 13px; color: #a1a1aa;">'
+        f'<a href="{unsubscribe_url}" style="color: #71717a; text-decoration: underline;">Unsubscribe</a> from these emails'
+        '</p>'
     )
 
 
@@ -19,94 +18,131 @@ def create_welcome_email_html(unsubscribe_url: Optional[str] = None) -> str:
     current_date = datetime.now().strftime("%B %d, %Y")
     footer_unsubscribe = _unsubscribe_footer(unsubscribe_url)
 
-    # Keep this template simple and lightweight so it's safe for most email clients.
     html = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to AI News Daily</title>
-        <style>
-            body {{
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-                background-color: #f5f5f7;
-                margin: 0;
-                padding: 0;
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Welcome to AI News Digest</title>
+    <style type="text/css">
+        body, table, td, p, a {{
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }}
+        body {{
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #f4f4f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }}
+        a {{
+            color: #3b82f6;
+            text-decoration: none;
+        }}
+        @media screen and (max-width: 600px) {{
+            .mobile-full-width {{
+                width: 100% !important;
             }}
-            .container {{
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 24px 16px;
+            .mobile-padding {{
+                padding: 32px 24px !important;
             }}
-            .card {{
-                background-color: #ffffff;
-                border-radius: 16px;
-                padding: 24px 20px;
-                box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-            }}
-            h1 {{
-                font-size: 24px;
-                margin: 0 0 8px 0;
-                color: #111827;
-            }}
-            p {{
-                font-size: 14px;
-                color: #4b5563;
-                line-height: 1.6;
-                margin: 8px 0;
-            }}
-            .pill {{
-                display: inline-block;
-                padding: 4px 10px;
-                border-radius: 999px;
-                font-size: 11px;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                background: #eef2ff;
-                color: #4f46e5;
-                margin-bottom: 12px;
-                font-weight: 600;
-            }}
-            .footer {{
-                margin-top: 16px;
-                font-size: 11px;
-                color: #9ca3af;
-                text-align: center;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="card">
-                <div class="pill">AI News Daily</div>
-                <h1>Welcome aboard 👋</h1>
-                <p>
-                    Thanks for subscribing to <strong>AI News Daily</strong> on {current_date}.
-                </p>
-                <p>
-                    A curated summary of the most important AI news and research highlights will land in
-                    your inbox once a day. No spam, just signal.
-                </p>
-                <p>
-                    You can unsubscribe at any time using the link in the footer of any email.
-                </p>
-                {footer_unsubscribe}
-                <p style="margin-top: 18px; font-size: 13px; color: #6b7280;">
-                    — AI News Daily
-                </p>
-            </div>
-            <div class="footer">
-                Sent by AI News Daily · Generated automatically
-            </div>
-        </div>
-    </body>
-    </html>
+        }}
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f4f4f5;">
+        <tr>
+            <td align="center" style="padding: 40px 16px;">
+                
+                <!-- Main container -->
+                <table role="presentation" class="mobile-full-width" width="560" cellspacing="0" cellpadding="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); padding: 40px 32px; text-align: center;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;">
+                                <tr>
+                                    <td style="padding-right: 10px;" valign="middle">
+                                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); border-radius: 8px; text-align: center;">
+                                            <span style="font-size: 18px; line-height: 36px; display: block;">✦</span>
+                                        </div>
+                                    </td>
+                                    <td valign="middle">
+                                        <span style="font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">AI News</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="mobile-padding" style="padding: 40px 40px 32px 40px;">
+                            <!-- Welcome icon -->
+                            <div style="width: 56px; height: 56px; background-color: #f0fdf4; border-radius: 50%; text-align: center; margin-bottom: 24px;">
+                                <span style="font-size: 28px; line-height: 56px; display: block;">👋</span>
+                            </div>
+                            
+                            <h1 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 700; color: #18181b; line-height: 1.3;">
+                                Welcome to AI News Digest
+                            </h1>
+                            
+                            <p style="margin: 0 0 16px 0; font-size: 15px; color: #52525b; line-height: 1.65;">
+                                Thanks for subscribing on <strong style="color: #18181b;">{current_date}</strong>.
+                            </p>
+                            
+                            <p style="margin: 0 0 16px 0; font-size: 15px; color: #52525b; line-height: 1.65;">
+                                You'll receive a curated summary of the most important AI news and research highlights in your inbox once a day. No spam, just signal.
+                            </p>
+                            
+                            <p style="margin: 0; font-size: 15px; color: #52525b; line-height: 1.65;">
+                                You can unsubscribe at any time using the link in the footer of any email.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Divider -->
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <div style="height: 1px; background-color: #e4e4e7;"></div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 24px 40px 32px 40px; text-align: center;">
+                            <p style="margin: 0; font-size: 13px; color: #a1a1aa;">
+                                Curated with ❤️ by <strong style="color: #71717a;">AI News Digest</strong>
+                            </p>
+                            {footer_unsubscribe}
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+                <!-- Bottom text -->
+                <table role="presentation" width="560" class="mobile-full-width" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="padding: 20px 40px; text-align: center;">
+                            <p style="margin: 0; font-size: 12px; color: #a1a1aa;">
+                                © {datetime.now().year} AI News Digest
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
     """
     return html
 
 
-WELCOME_EMAIL_SUBJECT = "Welcome to AI News Daily"
+WELCOME_EMAIL_SUBJECT = "Welcome to AI News Digest"
 
 
 def get_welcome_email(unsubscribe_url: Optional[str] = None) -> Tuple[str, str]:
@@ -119,76 +155,127 @@ def create_unsubscribe_email_html(resubscribe_url: Optional[str] = None) -> str:
     link_html = ""
     if resubscribe_url:
         link_html = (
-            f'<p style="margin: 12px 0 0 0; font-size: 14px;">'
-            f'If you change your mind, you can subscribe again any time '
-            f'<a href="{resubscribe_url}">on this page</a>.'
-            f"</p>"
+            '<p style="margin: 20px 0 0 0; font-size: 15px; color: #52525b; line-height: 1.65;">'
+            'Changed your mind? You can '
+            f'<a href="{resubscribe_url}" style="color: #3b82f6; text-decoration: underline;">subscribe again</a> '
+            'anytime.'
+            '</p>'
         )
 
     html = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>You've been unsubscribed</title>
-        <style>
-            body {{
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-                background-color: #f9fafb;
-                margin: 0;
-                padding: 0;
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>You've been unsubscribed</title>
+    <style type="text/css">
+        body, table, td, p, a {{
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }}
+        body {{
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #f4f4f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }}
+        @media screen and (max-width: 600px) {{
+            .mobile-full-width {{
+                width: 100% !important;
             }}
-            .container {{
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 24px 16px;
+            .mobile-padding {{
+                padding: 32px 24px !important;
             }}
-            .card {{
-                background-color: #ffffff;
-                border-radius: 16px;
-                padding: 24px 20px;
-                box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-            }}
-            h1 {{
-                font-size: 22px;
-                margin: 0 0 8px 0;
-                color: #111827;
-            }}
-            p {{
-                font-size: 14px;
-                color: #4b5563;
-                line-height: 1.6;
-                margin: 6px 0;
-            }}
-            .footer {{
-                margin-top: 16px;
-                font-size: 11px;
-                color: #9ca3af;
-                text-align: center;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="card">
-                <h1>You've been unsubscribed</h1>
-                <p>
-                    We're sorry to see you go. You will no longer receive AI News Daily emails at this address.
-                </p>
-                {link_html}
-            </div>
-            <div class="footer">
-                Sent by AI News Daily · This is an automated message
-            </div>
-        </div>
-    </body>
-    </html>
+        }}
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f4f4f5;">
+        <tr>
+            <td align="center" style="padding: 40px 16px;">
+                
+                <!-- Main container -->
+                <table role="presentation" class="mobile-full-width" width="560" cellspacing="0" cellpadding="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); padding: 40px 32px; text-align: center;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;">
+                                <tr>
+                                    <td style="padding-right: 10px;" valign="middle">
+                                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); border-radius: 8px; text-align: center;">
+                                            <span style="font-size: 18px; line-height: 36px; display: block;">✦</span>
+                                        </div>
+                                    </td>
+                                    <td valign="middle">
+                                        <span style="font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">AI News</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="mobile-padding" style="padding: 40px 40px 32px 40px;">
+                            <!-- Icon -->
+                            <div style="width: 56px; height: 56px; background-color: #fef2f2; border-radius: 50%; text-align: center; margin-bottom: 24px;">
+                                <span style="font-size: 28px; line-height: 56px; display: block;">👋</span>
+                            </div>
+                            
+                            <h1 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 700; color: #18181b; line-height: 1.3;">
+                                You've been unsubscribed
+                            </h1>
+                            
+                            <p style="margin: 0; font-size: 15px; color: #52525b; line-height: 1.65;">
+                                We're sorry to see you go. You will no longer receive AI News Digest emails at this address.
+                            </p>
+                            
+                            {link_html}
+                        </td>
+                    </tr>
+                    
+                    <!-- Divider -->
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <div style="height: 1px; background-color: #e4e4e7;"></div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 24px 40px 32px 40px; text-align: center;">
+                            <p style="margin: 0; font-size: 13px; color: #a1a1aa;">
+                                This is an automated message from <strong style="color: #71717a;">AI News Digest</strong>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+                <!-- Bottom text -->
+                <table role="presentation" width="560" class="mobile-full-width" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="padding: 20px 40px; text-align: center;">
+                            <p style="margin: 0; font-size: 12px; color: #a1a1aa;">
+                                © {datetime.now().year} AI News Digest
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
     """
     return html
 
 
-UNSUBSCRIBE_EMAIL_SUBJECT = "You've been unsubscribed from AI News Daily"
+UNSUBSCRIBE_EMAIL_SUBJECT = "You've been unsubscribed from AI News Digest"
 
 
 def get_unsubscribe_email(resubscribe_url: Optional[str] = None) -> Tuple[str, str]:
@@ -210,206 +297,157 @@ def create_welcome_with_news_email_html(unsubscribe_url: Optional[str], news_ite
     """
     current_date = datetime.now().strftime("%B %d, %Y")
     footer_unsubscribe = _unsubscribe_footer(unsubscribe_url)
+    
     html = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to AI News Daily - Today's News</title>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-            
-            * {{
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Welcome to AI News Digest - Today's News</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style type="text/css">
+        body, table, td, p, a, li, blockquote {{
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }}
+        table, td {{
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }}
+        img {{
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }}
+        body {{
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #f4f4f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }}
+        a {{
+            color: #3b82f6;
+            text-decoration: none;
+        }}
+        @media screen and (max-width: 600px) {{
+            .mobile-full-width {{
+                width: 100% !important;
+                max-width: 100% !important;
             }}
-            
-            body {{
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 20px;
-                line-height: 1.6;
+            .mobile-padding {{
+                padding-left: 20px !important;
+                padding-right: 20px !important;
             }}
-            
-            .email-container {{
-                max-width: 700px;
-                margin: 0 auto;
-                background: #ffffff;
-                border-radius: 20px;
-                overflow: hidden;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            .content-cell {{
+                padding: 24px 20px !important;
             }}
-            
-            .welcome-header {{
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 40px 30px;
-                text-align: center;
+            .news-card {{
+                margin-bottom: 16px !important;
             }}
-            
-            .welcome-header h1 {{
-                font-size: 32px;
-                font-weight: 700;
-                margin-bottom: 10px;
+            .header-title {{
+                font-size: 24px !important;
             }}
-            
-            .welcome-header p {{
-                font-size: 16px;
-                opacity: 0.9;
-                margin-top: 10px;
+            .video-thumbnail {{
+                width: 100% !important;
+                height: auto !important;
             }}
-            
-            .welcome-message {{
-                padding: 30px;
-                background: #f8f9fa;
-                border-bottom: 2px solid #e2e8f0;
-            }}
-            
-            .welcome-message h2 {{
-                font-size: 22px;
-                color: #2d3748;
-                margin-bottom: 15px;
-            }}
-            
-            .welcome-message p {{
-                font-size: 15px;
-                color: #4a5568;
-                line-height: 1.7;
-                margin-bottom: 10px;
-            }}
-            
-            .content {{
-                padding: 40px 30px;
-            }}
-            
-            .news-item {{
-                background: #f8f9fa;
-                border-radius: 15px;
-                padding: 25px;
-                margin-bottom: 25px;
-                border-left: 4px solid #667eea;
-                transition: all 0.3s ease;
-            }}
-            
-            .news-item:hover {{
-                transform: translateY(-5px);
-                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-                border-left-color: #764ba2;
-            }}
-            
-            .news-header {{
-                display: flex;
-                align-items: flex-start;
-                gap: 20px;
-                margin-bottom: 15px;
-            }}
-            
-            .thumbnail {{
-                width: 300px;
-                height: 150px;
-                border-radius: 10px;
-                object-fit: cover;
-                flex-shrink: 0;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            }}
-            
-            .news-info {{
-                flex: 1;
-            }}
-            
-            .source-badge {{
-                display: inline-block;
-                padding: 5px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 600;
-                text-transform: uppercase;
-                margin-bottom: 10px;
-            }}
-            
-            .source-website {{
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-            }}
-            
-            .source-youtube {{
-                background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
-                color: white;
-            }}
-            
-            .news-title {{
-                font-size: 20px;
-                font-weight: 600;
-                color: #2d3748;
-                margin-bottom: 12px;
-                line-height: 1.4;
-            }}
-            
-            .news-link {{
-                display: inline-block;
-                color: #667eea;
-                text-decoration: none;
-                font-weight: 600;
-                font-size: 14px;
-            }}
-            
-            .news-summary {{
-                color: #4a5568;
-                font-size: 15px;
-                line-height: 1.7;
-                margin-top: 15px;
-                padding-top: 15px;
-                border-top: 1px solid #e2e8f0;
-            }}
-            
-            .news-meta {{
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: 15px;
-                font-size: 13px;
-                color: #718096;
-            }}
-            
-            .footer {{
-                background: #f8f9fa;
-                padding: 30px;
-                text-align: center;
-                color: #718096;
-                font-size: 14px;
-            }}
-            
-            @media (max-width: 600px) {{
-                .news-header {{
-                    flex-direction: column;
-                }}
+        }}
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5;">
+    <!-- Preview text -->
+    <div style="display: none; max-height: 0; overflow: hidden;">
+        Welcome! Here's today's AI news digest curated just for you
+        &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+    </div>
+    
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f4f4f5;">
+        <tr>
+            <td align="center" style="padding: 40px 16px;">
                 
-                .thumbnail {{
-                    width: 100%;
-                    height: 200px;
-                }}
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="email-container">
-            <div class="welcome-header">
-                <h1>Welcome to AI News Daily 👋</h1>
-                <p>{current_date}</p>
-            </div>
-            
-            <div class="welcome-message">
-                <h2>Thanks for signing up!</h2>
-                <p>Here's the daily news you missed today:</p>
-                <p style="margin-top: 10px; font-size: 14px; color: #6b7280;">
-                    You'll receive a curated summary of the most important AI news and research highlights 
-                    in your inbox once a day. No spam, just signal.
-                </p>
-            </div>
-            
-            <div class="content">
+                <!-- Main container -->
+                <table role="presentation" class="mobile-full-width" width="600" cellspacing="0" cellpadding="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); padding: 52px 40px; text-align: center;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <!-- Logo -->
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 24px;">
+                                            <tr>
+                                                <td style="padding-right: 12px;" valign="middle">
+                                                    <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); border-radius: 10px; text-align: center;">
+                                                        <span style="font-size: 22px; line-height: 44px; display: block;">✦</span>
+                                                    </div>
+                                                </td>
+                                                <td valign="middle">
+                                                    <span style="font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">AI News</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">
+                                            Daily Digest
+                                        </p>
+                                        <p style="margin: 0; font-size: 15px; color: #64748b; font-weight: 400;">
+                                            {current_date}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Welcome message -->
+                    <tr>
+                        <td style="padding: 32px 40px; background-color: #f0fdf4; border-bottom: 1px solid #dcfce7;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td width="48" valign="top" style="padding-right: 16px;">
+                                        <div style="width: 40px; height: 40px; background-color: #ffffff; border-radius: 50%; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                            <span style="font-size: 20px; line-height: 40px; display: block;">👋</span>
+                                        </div>
+                                    </td>
+                                    <td valign="top">
+                                        <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #166534;">
+                                            Welcome to AI News Digest!
+                                        </h2>
+                                        <p style="margin: 0; font-size: 14px; color: #15803d; line-height: 1.5;">
+                                            Thanks for signing up. Here's today's top AI news — you'll receive these daily.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Intro section -->
+                    <tr>
+                        <td class="content-cell" style="padding: 28px 40px 20px 40px;">
+                            <p style="margin: 0; font-size: 15px; color: #52525b; line-height: 1.6;">
+                                Today's top stories, carefully curated to keep you informed about the latest developments in AI.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- News items container -->
+                    <tr>
+                        <td class="content-cell" style="padding: 0 40px 32px 40px;">
     """
     
     # Add news items
@@ -424,60 +462,152 @@ def create_welcome_with_news_email_html(unsubscribe_url: Optional[str], news_ite
         try:
             if published_at:
                 pub_date = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
-                formatted_date = pub_date.strftime("%B %d, %Y at %I:%M %p")
+                formatted_date = pub_date.strftime("%b %d, %Y")
             else:
-                formatted_date = "Date not available"
+                formatted_date = ""
         except:
-            formatted_date = published_at if published_at else "Date not available"
+            formatted_date = ""
         
-        # Get thumbnail for YouTube videos
-        thumbnail_html = ""
-        if source == "youtube":
+        # Determine source styling
+        is_youtube = source == "youtube"
+        source_bg = "#dc2626" if is_youtube else "#2563eb"
+        source_label = "VIDEO" if is_youtube else "ARTICLE"
+        source_icon = "▶" if is_youtube else "◉"
+        
+        # Build YouTube thumbnail section
+        thumbnail_section = ""
+        if is_youtube:
             video_id = source_link.split("v=")[-1].split("&")[0] if "v=" in source_link else ""
             if video_id:
                 thumbnail_url = get_youtube_thumbnail(video_id)
-                thumbnail_html = f'<img src="{thumbnail_url}" alt="Video thumbnail" class="thumbnail">'
-        
-        source_class = "source-website" if source == "website" else "source-youtube"
-        source_label = "📰 Website" if source == "website" else "📺 YouTube"
+                thumbnail_section = f"""
+                            <!-- YouTube Thumbnail -->
+                            <tr>
+                                <td style="padding-bottom: 16px;">
+                                    <a href="{source_link}" target="_blank" style="display: block; text-decoration: none;">
+                                        <img src="{thumbnail_url}" alt="Video thumbnail" class="video-thumbnail" width="520" style="width: 100%; height: auto; display: block; border-radius: 8px;">
+                                    </a>
+                                </td>
+                            </tr>
+                """
         
         html += f"""
-                <div class="news-item">
-                    <div class="news-header">
-                        {thumbnail_html if thumbnail_html else ''}
-                        <div class="news-info">
-                            <span class="source-badge {source_class}">{source_label}</span>
-                            <h2 class="news-title">{title}</h2>
-                            <a href="{source_link}" target="_blank" class="news-link">Read Full Article →</a>
-                        </div>
-                    </div>
-                    <div class="news-summary">
-                        {summary}
-                    </div>
-                    <div class="news-meta">
-                        <span>#{idx}</span>
-                        <span>{formatted_date}</span>
-                    </div>
-                </div>
+                            <!-- News Item {idx} -->
+                            <table role="presentation" class="news-card" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 24px; background-color: #fafafa; border-radius: 12px; overflow: hidden;">
+                                <tr>
+                                    <td style="padding: 24px;">
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                            <!-- Header row with number and source badge -->
+                                            <tr>
+                                                <td style="padding-bottom: 14px;">
+                                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                        <tr>
+                                                            <td width="36" valign="middle">
+                                                                <span style="display: inline-block; font-size: 15px; font-weight: 700; color: #3b82f6; letter-spacing: -0.5px;">#{idx}</span>
+                                                            </td>
+                                                            <td align="right" valign="middle">
+                                                                <span style="display: inline-block; padding: 5px 12px; background-color: {source_bg}; color: #ffffff; font-size: 10px; font-weight: 600; letter-spacing: 0.8px; border-radius: 20px; text-transform: uppercase;">
+                                                                    {source_icon} {source_label}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            
+                                            {thumbnail_section}
+                                            
+                                            <!-- Title -->
+                                            <tr>
+                                                <td style="padding-bottom: 12px;">
+                                                    <a href="{source_link}" target="_blank" style="text-decoration: none;">
+                                                        <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #18181b; line-height: 1.4;">
+                                                            {title}
+                                                        </h2>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Summary -->
+                                            <tr>
+                                                <td style="padding-bottom: 16px;">
+                                                    <p style="margin: 0; font-size: 15px; color: #52525b; line-height: 1.65;">
+                                                        {summary}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Footer with link and date -->
+                                            <tr>
+                                                <td>
+                                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                                        <tr>
+                                                            <td>
+                                                                <a href="{source_link}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #18181b; color: #ffffff; font-size: 13px; font-weight: 500; text-decoration: none; border-radius: 6px;">
+                                                                    {"Watch Video" if is_youtube else "Read More"} →
+                                                                </a>
+                                                            </td>
+                                                            <td align="right" style="font-size: 13px; color: #a1a1aa;">
+                                                                {formatted_date}
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
         """
     
-    html += """
-            </div>
-            
-            <div class="footer">
-                <p>Generated by AI News Aggregator</p>
-                <p style="margin-top: 10px; font-size: 12px;">Stay updated with the latest AI news and developments</p>
-                """ + footer_unsubscribe + """
-            </div>
-        </div>
-    </body>
-    </html>
+    html += f"""
+                        </td>
+                    </tr>
+                    
+                    <!-- Divider -->
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <div style="height: 1px; background-color: #e4e4e7;"></div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 32px 40px; text-align: center;">
+                            <p style="margin: 0 0 8px 0; font-size: 14px; color: #71717a;">
+                                Curated with ❤️ by <strong style="color: #18181b;">AI News Digest</strong>
+                            </p>
+                            <p style="margin: 0; font-size: 13px; color: #a1a1aa;">
+                                Keeping you informed about the future of AI
+                            </p>
+                            {footer_unsubscribe}
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+                <!-- Bottom branding -->
+                <table role="presentation" width="600" class="mobile-full-width" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="padding: 24px 40px; text-align: center;">
+                            <p style="margin: 0; font-size: 12px; color: #a1a1aa;">
+                                © {datetime.now().year} AI News Digest. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
     """
     
     return html
 
 
-WELCOME_WITH_NEWS_EMAIL_SUBJECT = "Welcome to AI News Daily - Here's Today's News"
+WELCOME_WITH_NEWS_EMAIL_SUBJECT = "Welcome to AI News Digest - Here's Today's News"
 
 
 def get_welcome_with_news_email(unsubscribe_url: Optional[str], news_items: List[Dict]) -> Tuple[str, str]:
@@ -488,5 +618,3 @@ def get_welcome_with_news_email(unsubscribe_url: Optional[str], news_items: List
         news_items: List of news item dicts
     """
     return WELCOME_WITH_NEWS_EMAIL_SUBJECT, create_welcome_with_news_email_html(unsubscribe_url, news_items)
-
-
