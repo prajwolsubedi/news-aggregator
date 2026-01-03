@@ -31,34 +31,32 @@ TTL: 3600 (or default)
 - GitHub will automatically detect when DNS is configured correctly
 - You'll see a green checkmark in GitHub Pages settings when DNS is verified
 
-## GitHub Secrets Configuration
+## GitHub Secrets / Environment
 
-✅ **No additional secrets needed!**
+Set the API base URL to the Azure backend so unsubscribe calls hit Azure (not Render):
 
-The workflow automatically uses your existing `RENDER_BASE_URL` secret for the frontend build. Make sure you have:
+- `VITE_API_BASE_URL` → `https://ai-newsletter-a0dcfrdjfxasfydt.centralindia-01.azurewebsites.net`
 
-- `RENDER_BASE_URL` - Your Render backend URL (e.g., `https://ai-news-web-j6uy.onrender.com`)
+This tells the frontend where to send API requests (subscribe/unsubscribe).
 
-This tells the frontend where to send API requests.
+## Azure Backend Configuration
 
-## Render Backend Configuration
+In your Azure App Service settings, set the `FRONTEND_URL` environment variable:
 
-In your Render dashboard, set the `FRONTEND_URL` environment variable:
-
-1. Go to your Render service → **Environment** tab
+1. Go to your Azure App Service → **Configuration**
 2. Add/Update:
    - **Key**: `FRONTEND_URL`
    - **Value**: `https://ainews.prajwolsubedi.com.np`
 
-This ensures unsubscribe links in emails point to your custom domain.
+This ensures unsubscribe links in emails point to your custom domain (served by Azure backend).
 
 ## Verification Checklist
 
 - [ ] Custom domain set in GitHub Pages settings
 - [ ] CNAME DNS record added
 - [ ] DNS verified (green checkmark in GitHub)
-- [x] `RENDER_BASE_URL` secret (already set - used for frontend build)
-- [ ] `FRONTEND_URL` set in Render backend
+- [ ] `VITE_API_BASE_URL` secret set to Azure backend URL
+- [ ] `FRONTEND_URL` set in Azure App Service
 - [ ] GitHub Actions workflow runs successfully
 - [ ] Site accessible at `https://ainews.prajwolsubedi.com.np`
 
